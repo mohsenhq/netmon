@@ -20,6 +20,7 @@
 /home/mohsenhq/netmon/src/main/java/org/redapps/netmon/model/Company.java
 /home/mohsenhq/netmon/src/main/java/org/redapps/netmon/payload/DeviceRequest.java
 /home/mohsenhq/netmon/src/main/java/org/redapps/netmon/service/OSTypeService.java
+/home/mohsenhq/netmon/src/main/java/org/redapps/netmon/model/ServiceIdentity.java
 /home/mohsenhq/netmon/src/main/java/org/redapps/netmon/payload/JwtAuthenticationResponse.java
 /home/mohsenhq/netmon/src/main/java/org/redapps/netmon/util/PaymentStatusService.java
 /home/mohsenhq/netmon/src/main/java/org/redapps/netmon/service/CompanyService.java
@@ -103,6 +104,7 @@
 /home/mohsenhq/netmon/src/main/java/org/redapps/netmon/model/IP.java
 /home/mohsenhq/netmon/src/main/java/org/redapps/netmon/payload/VpsRequest.java
 /home/mohsenhq/netmon/src/main/java/org/redapps/netmon/payload/PagedResponse.java
+/home/mohsenhq/netmon/src/main/java/org/redapps/netmon/repository/ServiceIdentityRepository.java
 /home/mohsenhq/netmon/src/main/java/org/redapps/netmon/payload/OSTypeResponse.java
 /home/mohsenhq/netmon/src/main/java/org/redapps/netmon/controller/customer/CustomerController.java
 /home/mohsenhq/netmon/src/main/java/org/redapps/netmon/payload/CompanyRequest.java
