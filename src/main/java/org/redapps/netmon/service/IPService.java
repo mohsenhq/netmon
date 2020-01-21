@@ -4,6 +4,7 @@ import org.redapps.netmon.exception.BadRequestException;
 import org.redapps.netmon.exception.ResourceNotFoundException;
 import org.redapps.netmon.model.IP;
 import org.redapps.netmon.model.NetmonService;
+import org.redapps.netmon.model.ServiceIdentity;
 import org.redapps.netmon.payload.ServiceIPRequest;
 import org.redapps.netmon.payload.ServiceIPResponse;
 import org.redapps.netmon.payload.PagedResponse;
@@ -44,7 +45,7 @@ public class IPService {
      * @param serviceId the unique service number
      * @return ip
      */
-    public IP create(ServiceIPRequest serviceIPRequest, UserPrincipal currentUser , Long serviceId) {
+    public IP create(ServiceIPRequest serviceIPRequest, UserPrincipal currentUser , ServiceIdentity serviceId) {
 
         // find service by id
         NetmonService netmonService = netmonServiceRepository.getOne(serviceId);
@@ -106,7 +107,7 @@ public class IPService {
      * @param size the page size of each response (default value is 30)
      * @return ip response page by page
      */
-    public PagedResponse<ServiceIPResponse> getServiceIps(Long serviceId, UserPrincipal currentUser,
+    public PagedResponse<ServiceIPResponse> getServiceIps(ServiceIdentity serviceId, UserPrincipal currentUser,
                                                           int page, int size) {
         validatePageNumberAndSize(page, size);
 

@@ -1,12 +1,13 @@
 package org.redapps.netmon.payload;
 
+import org.redapps.netmon.model.ServiceIdentity;
 import org.redapps.netmon.util.NetmonStatus;
 
 import java.time.LocalDate;
 
 public class ColocationResponse {
 
-    private Long id;
+    private ServiceIdentity id;
     private String name;
     private int unitNumber;
     private String slaType;
@@ -24,7 +25,7 @@ public class ColocationResponse {
     private String technicalPersonId;
     private Long osTypeId;
 
-    public ColocationResponse(Long id, String name, int unitNumber, String slaType,
+    public ColocationResponse(ServiceIdentity id, String name, int unitNumber, String slaType,
                                String description, int validIp, int invalidIp, NetmonStatus.ServiceStatus status,
                                String usageType, String rackPosition, Long osTypeId,
                                LocalDate startDate, Long duration, double discountPercent) {
@@ -52,11 +53,11 @@ public class ColocationResponse {
         this.name = name;
     }
 
-    public Long getId() {
+    public ServiceIdentity getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(ServiceIdentity id) {
         this.id = id;
     }
 

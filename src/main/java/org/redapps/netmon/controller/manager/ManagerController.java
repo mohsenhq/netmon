@@ -2,6 +2,7 @@ package org.redapps.netmon.controller.manager;
 
 import org.redapps.netmon.exception.ResourceNotFoundException;
 import org.redapps.netmon.model.Company;
+import org.redapps.netmon.model.ServiceIdentity;
 import org.redapps.netmon.model.VpsPlan;
 import org.redapps.netmon.payload.*;
 import org.redapps.netmon.repository.*;
@@ -204,7 +205,7 @@ public class ManagerController {
                                             @CurrentUser UserPrincipal currentUser,
                                             @PathVariable Long customerId,
                                             @PathVariable String serviceType,
-                                            @PathVariable Long serviceId) {
+                                            @PathVariable ServiceIdentity serviceId) {
 
         if (!userRepository.existsById(customerId)) {
             logService.createLog("CONFIRM_SERVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
@@ -259,7 +260,7 @@ public class ManagerController {
                                                       @CurrentUser UserPrincipal currentUser,
                                                       @PathVariable Long customerId,
                                                       @PathVariable String serviceType,
-                                                      @PathVariable Long serviceId,
+                                                      @PathVariable ServiceIdentity serviceId,
                                                       @PathVariable Long billingId) {
 
         if (!userRepository.existsById(customerId)) {

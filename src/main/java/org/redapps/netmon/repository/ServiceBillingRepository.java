@@ -2,6 +2,7 @@ package org.redapps.netmon.repository;
 
 
 import org.redapps.netmon.model.Billing;
+import org.redapps.netmon.model.ServiceIdentity;
 import org.redapps.netmon.util.NetmonStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,8 +16,8 @@ import java.util.Optional;
 public interface ServiceBillingRepository extends JpaRepository<Billing, Long> {
     Optional<Billing> findById(Long id);
 
-    Page<Billing> findByNetmonServiceId(Long netmonServiceId, Pageable pageable);
+    Page<Billing> findByNetmonServiceId(ServiceIdentity serviceId, Pageable pageable);
 
-    List<Billing> findByNetmonServiceIdAndStatus(Long netmonServiceId, NetmonStatus.BillingStatus status);
+    List<Billing> findByNetmonServiceIdAndStatus(ServiceIdentity serviceId, NetmonStatus.BillingStatus status);
 
 }

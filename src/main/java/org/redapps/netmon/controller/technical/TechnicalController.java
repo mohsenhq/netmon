@@ -145,7 +145,7 @@ public class TechnicalController {
                                              @CurrentUser UserPrincipal currentUser,
                                              @PathVariable Long customerId,
                                              @PathVariable String serviceType,
-                                             @PathVariable Long serviceId) {
+                                             @PathVariable ServiceIdentity serviceId) {
 
         initialChecking("CREATE_COLOCATION_IP", currentUser.getUsername(), customerId,
                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + "]",
@@ -184,7 +184,7 @@ public class TechnicalController {
     public ResponseEntity<?> deleteServiceIP(@CurrentUser UserPrincipal currentUser,
                                              @PathVariable Long customerId,
                                              @PathVariable String serviceType,
-                                             @PathVariable Long serviceId,
+                                             @PathVariable ServiceIdentity serviceId,
                                              @PathVariable Long ipId) {
 
         initialChecking("DELETE_SERVICE_IP", currentUser.getUsername(), customerId,
@@ -227,7 +227,7 @@ public class TechnicalController {
                                              @PathVariable Long customerId,
                                              @PathVariable String serviceType,
                                              @PathVariable Long ipId,
-                                             @PathVariable Long serviceId) {
+                                             @PathVariable ServiceIdentity serviceId) {
 
         initialChecking("UPDATE_SERVICE_IP", currentUser.getUsername(), customerId,
                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + ipId + "]",
@@ -272,7 +272,7 @@ public class TechnicalController {
     public ResponseEntity<?> createColocationDevice(@Valid @RequestBody DeviceRequest colocationDeviceRequest,
                                                      @CurrentUser UserPrincipal currentUser,
                                                      @PathVariable Long customerId,
-                                                     @PathVariable Long colocationId) {
+                                                     @PathVariable ServiceIdentity colocationId) {
 
         initialChecking("UPDATE_SERVICE_IP", currentUser.getUsername(), customerId,
                 "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId + "]",
@@ -302,7 +302,7 @@ public class TechnicalController {
     public ResponseEntity<?> deleteColocationDevice(@CurrentUser UserPrincipal currentUser,
                                                      @PathVariable Long customerId,
                                                      @PathVariable Long deviceId,
-                                                     @PathVariable Long colocationId) {
+                                                     @PathVariable ServiceIdentity colocationId) {
 
         initialChecking("UPDATE_SERVICE_IP", currentUser.getUsername(), customerId,
                 "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId
@@ -341,7 +341,7 @@ public class TechnicalController {
                                                      @CurrentUser UserPrincipal currentUser,
                                                      @PathVariable Long customerId,
                                                      @PathVariable Long deviceId,
-                                                     @PathVariable Long colocationId) {
+                                                     @PathVariable ServiceIdentity colocationId) {
 
         initialChecking("UPDATE_SERVICE_IP", currentUser.getUsername(), customerId,
                 "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId
@@ -380,7 +380,7 @@ public class TechnicalController {
                                                              @CurrentUser UserPrincipal currentUser,
                                                              @PathVariable Long customerId,
                                                              @PathVariable Long deviceId,
-                                                             @PathVariable Long colocationId) {
+                                                             @PathVariable ServiceIdentity colocationId) {
 
         initialChecking("CHANGE_COLOCATION_DEVICE_STATUS", currentUser.getUsername(), customerId,
                 "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId
@@ -419,7 +419,7 @@ public class TechnicalController {
                                                @CurrentUser UserPrincipal currentUser,
                                                @PathVariable Long customerId,
                                                @PathVariable String serviceType,
-                                               @PathVariable Long serviceId) {
+                                               @PathVariable ServiceIdentity serviceId) {
 
         initialChecking("CREATE_SERVICE_PORT", currentUser.getUsername(), customerId,
                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + "]",
@@ -457,7 +457,7 @@ public class TechnicalController {
     public ResponseEntity<?> deleteServicePort(@CurrentUser UserPrincipal currentUser,
                                                @PathVariable Long customerId,
                                                @PathVariable String serviceType,
-                                               @PathVariable Long serviceId,
+                                               @PathVariable ServiceIdentity serviceId,
                                                @PathVariable Long portId) {
         initialChecking("DELETE_SERVICE_PORT", currentUser.getUsername(), customerId,
                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" +
@@ -499,7 +499,7 @@ public class TechnicalController {
                                                @PathVariable Long customerId,
                                                @PathVariable String serviceType,
                                                @PathVariable Long portId,
-                                               @PathVariable Long serviceId) {
+                                               @PathVariable ServiceIdentity serviceId) {
         initialChecking("UPDATE_SERVICE_PORT", currentUser.getUsername(), customerId,
                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId +
                         ",portId=" + portId + "]", servicePortRequest.toString());
@@ -546,7 +546,7 @@ public class TechnicalController {
                                                @CurrentUser UserPrincipal currentUser,
                                                @PathVariable Long customerId,
                                                @PathVariable String serviceType,
-                                               @PathVariable Long serviceId,
+                                               @PathVariable ServiceIdentity serviceId,
                                                @PathVariable Long ticketId) {
         initialChecking("SET_TICKET_RESPONSE", currentUser.getUsername(), customerId,
                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + ",ticketId="
@@ -694,7 +694,7 @@ public class TechnicalController {
                                                           @CurrentUser UserPrincipal currentUser,
                                                           @PathVariable Long customerId,
                                                           @PathVariable String serviceType,
-                                                          @PathVariable Long serviceId) {
+                                                          @PathVariable ServiceIdentity serviceId) {
 
         initialChecking("RENAME_SERVICE", currentUser.getUsername(), customerId,
                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + "]",
@@ -720,7 +720,7 @@ public class TechnicalController {
      * @param requestParams query parameters of request
      * @param bodyParams body parameters of request
      */
-    private void initialChecking(String action, String username, Long customerId, String serviceType, Long serviceId,
+    private void initialChecking(String action, String username, Long customerId, String serviceType, ServiceIdentity serviceId,
                                  String requestParams, String bodyParams){
 
         if (!userRepository.existsById(customerId)) {

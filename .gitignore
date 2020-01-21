@@ -1,4 +1,5 @@
 *.class
+target/
 target/netmon-1.0.1.jar
 target/netmon-1.0.1.jar.original
 target/classes/application.properties
@@ -139,3 +140,9 @@ target/classes/org/redapps/netmon/util/ProcessIpUsageFiles.class
 target/classes/org/redapps/netmon/util/RandomCodeGenerator.class
 target/classes/org/redapps/netmon/util/SMSSender.class
 target/classes/org/redapps/netmon/util/UploadFiles.class
+.settings/org.eclipse.core.resources.prefs
+.settings/org.eclipse.jdt.apt.core.prefs
+.settings/org.eclipse.jdt.core.prefs
+.settings/org.eclipse.m2e.core.prefs
+.project
+.vscode/launch.json

@@ -80,7 +80,7 @@ public class BillingService {
      * @return list of billing responses
      */
     public PagedResponse<ServiceBillingResponse> getServiceBillings(UserPrincipal currentUser,
-                                                                    Long serviceId,
+                                                                    ServiceIdentity serviceId,
                                                                     int page, int size) {
         validatePageNumberAndSize(page, size);
 
@@ -120,7 +120,7 @@ public class BillingService {
      * @param serviceId the unique service number
      * @return billing response
      */
-    public Billing getLastPaidBilling(Long serviceId) {
+    public Billing getLastPaidBilling(ServiceIdentity serviceId) {
 
         // find list of paid billings
         List<Billing> billings = serviceBillingRepository.findByNetmonServiceIdAndStatus(serviceId,
@@ -194,7 +194,7 @@ public class BillingService {
      * @param description an explanation of the action
      * @return billing response
      */
-    public Billing calculateBilling(UserPrincipal currentUser, Long serviceId,
+    public Billing calculateBilling(UserPrincipal currentUser, ServiceIdentity serviceId,
                                  LocalDate startDate, LocalDate endDate, String description) {
 
         // find service by id

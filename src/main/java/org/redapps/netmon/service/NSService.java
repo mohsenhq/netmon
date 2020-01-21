@@ -146,7 +146,7 @@ public class NSService {
      * @param currentUser the user id who currently logged in
      * @return colocation response
      */
-    public ColocationResponse getColocationById(Long colocationId, UserPrincipal currentUser) {
+    public ColocationResponse getColocationById(ServiceIdentity colocationId, UserPrincipal currentUser) {
 
         // find the colocation by id
         Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(colocationId);
@@ -291,7 +291,7 @@ public class NSService {
      * @param currentUser the user id who currently logged in
      * @return vps response
      */
-    public VpsResponse getVPSById(Long vpsId, UserPrincipal currentUser) {
+    public VpsResponse getVPSById(ServiceIdentity vpsId, UserPrincipal currentUser) {
 
         // find the service by id
         Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(vpsId);
@@ -323,7 +323,7 @@ public class NSService {
      * @param serviceConfirmRequest the service information object to confirm
      * @return a new service object
      */
-    public NetmonService managerConfirmService(UserPrincipal currentUser, Long serviceId,
+    public NetmonService managerConfirmService(UserPrincipal currentUser, ServiceIdentity serviceId,
                                                ServiceConfirmRequest serviceConfirmRequest) {
 
         // find the service by id
@@ -362,7 +362,7 @@ public class NSService {
      * @param serviceConfirmRequest the service information object to confirm
      * @return a new service object
      */
-    public NetmonService customerConfirmService(UserPrincipal currentUser, Long serviceId,
+    public NetmonService customerConfirmService(UserPrincipal currentUser, ServiceIdentity serviceId,
                                                 ServiceConfirmRequest serviceConfirmRequest) {
 
         // find the service by id
@@ -395,7 +395,7 @@ public class NSService {
      * @param renameServiceRequest the new name of service and start date
      * @return a new service object
      */
-    public NetmonService renameService(UserPrincipal currentUser, Long serviceId,
+    public NetmonService renameService(UserPrincipal currentUser, ServiceIdentity serviceId,
                                        RenameServiceRequest renameServiceRequest) {
 
         // find a service by id

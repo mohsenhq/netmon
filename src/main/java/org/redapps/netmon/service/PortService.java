@@ -4,6 +4,7 @@ import org.redapps.netmon.exception.BadRequestException;
 import org.redapps.netmon.exception.ResourceNotFoundException;
 import org.redapps.netmon.model.NetmonService;
 import org.redapps.netmon.model.Port;
+import org.redapps.netmon.model.ServiceIdentity;
 import org.redapps.netmon.payload.*;
 import org.redapps.netmon.repository.NetmonServiceRepository;
 import org.redapps.netmon.repository.ServicePortRepository;
@@ -41,7 +42,7 @@ public class PortService {
      * @param serviceId the unique service number
      * @return port response
      */
-    public Port create(ServicePortRequest servicePortRequest, UserPrincipal currentUser, Long serviceId) {
+    public Port create(ServicePortRequest servicePortRequest, UserPrincipal currentUser, ServiceIdentity serviceId) {
 
         // create a new port object
         Port port = new Port();
@@ -107,7 +108,7 @@ public class PortService {
      * @param size the page size of each response (default value is 30)
      * @return port responses page by page
      */
-    public PagedResponse<ServicePortResponse> getServicePorts(UserPrincipal currentUser, Long serviceId,
+    public PagedResponse<ServicePortResponse> getServicePorts(UserPrincipal currentUser, ServiceIdentity serviceId,
                                                               int page, int size) {
         validatePageNumberAndSize(page, size);
 

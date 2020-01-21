@@ -37,7 +37,10 @@ public class Billing extends UserDateAudit {
     private long referenceId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "service_id", nullable = false)
+    @JoinColumns ({
+        @JoinColumn(name = "service_id", nullable = false),
+        @JoinColumn(name = "CREATE_DATE", nullable = false)
+    })
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private NetmonService netmonService;

@@ -19,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.redapps.netmon.repository.UserRepository;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -52,6 +53,8 @@ public class CustomerController {
     private final OSTypeService osTypeService;
     private final ServiceBillingRepository serviceBillingRepository;
     private final VpsPlanService vpsPlanService;
+    private final UserManagementService userManagementService;
+    private final UserRepository userRepository;
 
     @Autowired
     public CustomerController(TechnicalPersonRepository technicalPersonRepository,
@@ -65,7 +68,9 @@ public class CustomerController {
                               CompanyRepository companyRepository, CompanyService companyService,
                               LogService logService, VpsPlanRepository vpsPlanRepository,
                               ServiceBillingRepository serviceBillingRepository,
-                              VpsPlanService vpsPlanService) {
+                              VpsPlanService vpsPlanService,
+                              UserManagementService userManagementService,
+                              UserRepository userRepository) {
         this.technicalPersonRepository = technicalPersonRepository;
         this.colocationDeviceService = colocationDeviceService;
         this.technicalPersonService = technicalPersonService;
@@ -86,6 +91,8 @@ public class CustomerController {
         this.osTypeService = osTypeService;
         this.serviceBillingRepository = serviceBillingRepository;
         this.vpsPlanService = vpsPlanService;
+        this.userManagementService = userManagementService;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -417,7 +424,7 @@ public class CustomerController {
     @GetMapping("/colocations/{colocationId}")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ColocationResponse getColocationById(@CurrentUser UserPrincipal currentUser,
-                                                  @PathVariable Long colocationId) {
+                                                  @PathVariable ServiceIdentity colocationId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
         if(!companyOptional.isPresent()){
@@ -449,7 +456,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<?> createColocationDevice(@Valid @RequestBody DeviceRequest colocationDeviceRequest,
                                                      @CurrentUser UserPrincipal currentUser,
-                                                     @PathVariable Long colocationId) {
+                                                     @PathVariable ServiceIdentity colocationId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
         if(!companyOptional.isPresent()){
@@ -490,7 +497,7 @@ public class CustomerController {
     @GetMapping("/colocations/{colocationId}/devices/all")
     @PreAuthorize("hasRole('CUSTOMER')")
     public PagedResponse<ColocationDeviceResponse> getColocationDevices(@CurrentUser UserPrincipal currentUser,
-                                                                          @PathVariable Long colocationId,
+                                                                          @PathVariable ServiceIdentity colocationId,
                                                                           @RequestParam(value = "page",
                                                                                   defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                                           @RequestParam(value = "size",
@@ -526,7 +533,7 @@ public class CustomerController {
     @GetMapping("/colocations/{colocationId}/devices/{deviceId}")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ColocationDeviceResponse getColocationDeviceById(@CurrentUser UserPrincipal currentUser,
-                                                              @PathVariable Long colocationId,
+                                                              @PathVariable ServiceIdentity colocationId,
                                                               @PathVariable Long deviceId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
@@ -562,7 +569,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public PagedResponse<ServiceIPResponse> getServiceIPs(@CurrentUser UserPrincipal currentUser,
                                                           @PathVariable String serviceType,
-                                                          @PathVariable Long serviceId,
+                                                          @PathVariable ServiceIdentity serviceId,
                                                           @RequestParam(value = "page",
                                                                   defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                           @RequestParam(value = "size",
@@ -602,7 +609,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ServiceIPResponse getServiceIPById(@CurrentUser UserPrincipal currentUser,
                                               @PathVariable String serviceType,
-                                              @PathVariable Long serviceId,
+                                              @PathVariable ServiceIdentity serviceId,
                                               @PathVariable Long ipId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
@@ -647,7 +654,7 @@ public class CustomerController {
                                               @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                                               @RequestParam("description") String description,
                                               @PathVariable String serviceType,
-                                              @PathVariable Long serviceId) {
+                                              @PathVariable ServiceIdentity serviceId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
         if(!companyOptional.isPresent()){
@@ -704,7 +711,7 @@ public class CustomerController {
     public ResponseEntity<?> updateBillingOrderId(@Valid @RequestBody CallAPIBillingRequest callAPIBillingRequest,
                                                       @CurrentUser UserPrincipal currentUser,
                                                       @PathVariable String serviceType,
-                                                      @PathVariable Long serviceId,
+                                                      @PathVariable ServiceIdentity serviceId,
                                                       @PathVariable Long billingId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
@@ -752,7 +759,7 @@ public class CustomerController {
     public ResponseEntity<?> updateBillingReferenceId(@Valid @RequestBody CallAPIBillingRequest callAPIBillingRequest,
                                                       @CurrentUser UserPrincipal currentUser,
                                                       @PathVariable String serviceType,
-                                                      @PathVariable Long serviceId,
+                                                      @PathVariable ServiceIdentity serviceId,
                                                       @PathVariable Long billingId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
@@ -797,7 +804,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public Billing getLastPaidBilling(@CurrentUser UserPrincipal currentUser,
                                                 @PathVariable String serviceType,
-                                                @PathVariable Long serviceId) {
+                                                @PathVariable ServiceIdentity serviceId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
         if(!companyOptional.isPresent()){
@@ -837,7 +844,7 @@ public class CustomerController {
                                              @RequestParam("endDate")
                                              @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                                              @PathVariable String serviceType,
-                                             @PathVariable Long serviceId,
+                                             @PathVariable ServiceIdentity serviceId,
                                              @PathVariable Long ipId,
                                              @CurrentUser UserPrincipal currentUser) {
 
@@ -910,7 +917,7 @@ public class CustomerController {
     public ResponseEntity<?> createColocationPort(@Valid @RequestBody ServicePortRequest servicePortRequest,
                                                    @CurrentUser UserPrincipal currentUser,
                                                    @PathVariable String serviceType,
-                                                   @PathVariable Long serviceId) {
+                                                   @PathVariable ServiceIdentity serviceId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
         if(!companyOptional.isPresent()){
@@ -962,7 +969,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public PagedResponse<ServicePortResponse> getColocationPorts(@CurrentUser UserPrincipal currentUser,
                                                                   @PathVariable String serviceType,
-                                                                  @PathVariable Long serviceId,
+                                                                  @PathVariable ServiceIdentity serviceId,
                                                                   @RequestParam(value = "page",
                                                                           defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                                   @RequestParam(value = "size",
@@ -1001,7 +1008,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ServicePortResponse getColocationPortById(@CurrentUser UserPrincipal currentUser,
                                                       @PathVariable String serviceType,
-                                                      @PathVariable Long serviceId,
+                                                      @PathVariable ServiceIdentity serviceId,
                                                       @PathVariable Long portId) {
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
         if(!companyOptional.isPresent()){
@@ -1038,7 +1045,7 @@ public class CustomerController {
     public ResponseEntity<?> createServiceTicket(@Valid @RequestBody ServiceTicketRequest serviceTicketRequest,
                                                  @CurrentUser UserPrincipal currentUser,
                                                  @PathVariable String serviceType,
-                                                 @PathVariable Long serviceId) {
+                                                 @PathVariable ServiceIdentity serviceId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
         if(!companyOptional.isPresent()){
@@ -1082,7 +1089,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public PagedResponse<ServiceTicketResponse> getServiceTickets(@CurrentUser UserPrincipal currentUser,
                                                                   @PathVariable String serviceType,
-                                                                  @PathVariable Long serviceId,
+                                                                  @PathVariable ServiceIdentity serviceId,
                                                                   @RequestParam(value = "page",
                                                                           defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                                   @RequestParam(value = "size",
@@ -1121,7 +1128,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ServiceTicketResponse getServiceTicketById(@CurrentUser UserPrincipal currentUser,
                                                       @PathVariable String serviceType,
-                                                      @PathVariable Long serviceId,
+                                                      @PathVariable ServiceIdentity serviceId,
                                                       @PathVariable Long ticketId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
@@ -1158,7 +1165,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ServiceBillingResponse getServiceBillingById(@CurrentUser UserPrincipal currentUser,
                                                         @PathVariable String serviceType,
-                                                        @PathVariable Long serviceId,
+                                                        @PathVariable ServiceIdentity serviceId,
                                                         @PathVariable Long billingId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
@@ -1196,7 +1203,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public PagedResponse<ServiceBillingResponse> getServiceBillings(@CurrentUser UserPrincipal currentUser,
                                                                     @PathVariable String serviceType,
-                                                                    @PathVariable Long serviceId,
+                                                                    @PathVariable ServiceIdentity serviceId,
                                                                     @RequestParam(value = "page",
                                                                             defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                                     @RequestParam(value = "size",
@@ -1458,7 +1465,7 @@ public class CustomerController {
      */
     @GetMapping("/vps/{vpsId}")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public VpsResponse getVPSById(@CurrentUser UserPrincipal currentUser, @PathVariable Long vpsId) {
+    public VpsResponse getVPSById(@CurrentUser UserPrincipal currentUser, @PathVariable ServiceIdentity vpsId) {
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
         if(!companyOptional.isPresent()){
             logService.createLog("GET_VPS_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
@@ -1509,7 +1516,7 @@ public class CustomerController {
     public ResponseEntity<?> confirmService(@Valid @RequestBody ServiceConfirmRequest serviceConfirmRequest,
                                             @CurrentUser UserPrincipal currentUser,
                                             @PathVariable String serviceType,
-                                            @PathVariable Long serviceId) {
+                                            @PathVariable ServiceIdentity serviceId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
         if(!companyOptional.isPresent()){
@@ -1557,5 +1564,75 @@ public class CustomerController {
 
 
         return vpsPlanService.getPlans(currentUser, page, size);
+    }
+
+    /**
+     * updating info (name, email, mobile, ...) of technical person
+     * @param updateUserRequest the technicalPerson information object
+     * @param currentUser the user id who currently logged in
+     * @return OK response or report error
+     */
+    @PostMapping("/update")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> updateCustomerInfo(@Valid @RequestBody UpdateUserRequest updateUserRequest,
+                                                   @CurrentUser UserPrincipal currentUser) {
+
+        // if (!technicalPersonRepository.existsByIdAndUserId(technicalPersonId, currentUser.getId())) {
+        //     logService.createLog("UPDATE_TECHNICAL_PERSON", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+        //             "[technicalPersonId=" + technicalPersonId + "]", technicalPersonRequest.toString(),
+        //             "This technical person does not belong to the customer.");
+        //     throw new BadRequestException("This technical person does not belong to the customer.");
+        // }
+
+        // technicalPersonService.update(currentUser, technicalPersonId, technicalPersonRequest);
+
+        // URI location = ServletUriComponentsBuilder
+        //         .fromCurrentRequest().path("/{technicalPersonId}")
+        //         .buildAndExpand(technicalPersonId).toUri();
+
+        // return ResponseEntity.created(location)
+        //         .body(new ApiResponse(true, "TechnicalPerson updated successfully"));
+ 
+        //     logService.createLog("UPDATE_TECHNICAL_PERSON", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+        //             "[technicalPersonId=" + technicalPersonId + "]", technicalPersonRequest.toString(),
+        //             "This technical person does not belong to the customer.");
+        //     throw new BadRequestException("This technical person does not belong to the customer.");
+
+
+        // technicalPersonService.update(currentUser, technicalPersonId, technicalPersonRequest);
+        userManagementService.updateUser(currentUser, currentUser.getId(), updateUserRequest);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest().path("/")
+                .buildAndExpand().toUri();
+
+        return ResponseEntity.created(location)
+                .body(new ApiResponse(true, "UserInfo updated successfully"));
+    }
+
+
+    /**
+     * getting list of all urls for the customer role
+     * @return an arrays of urls
+     */
+    @GetMapping("/profile")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public UserProfile getCustomerProfile(@CurrentUser UserPrincipal currentUser) {
+        Optional<User> userOptional = userRepository.findByUsername(currentUser.getUsername());
+        User user = userOptional.get();
+        return new UserProfile(user.getId(),
+                        user.getUsername(),
+                        user.getName(),
+                        user.getEmail(),
+                        // user.getMobile(),
+                        // user.getTelNumber(),
+                        // user.getRoles(),
+                        // user.getNationalID(),
+                        user.getCreatedAt());
+
+
+        // return new String[]{"GET: /api/customer/urls",
+        //         "PUT: /api/customer/vps/{vpsId}/confirm",
+        //         "GET: /api/customer/plans/all",
+        //         "GET: /api/customer/osType/all"};
     }
 }

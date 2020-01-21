@@ -112,7 +112,7 @@ public class StaffController {
     @PreAuthorize("hasRole('TECHNICAL') OR hasRole('MANAGER')")
     public ColocationResponse getColocationById(@CurrentUser UserPrincipal currentUser,
                                                   @PathVariable Long customerId,
-                                                  @PathVariable Long colocationId) {
+                                                  @PathVariable ServiceIdentity colocationId) {
 
         if (!userRepository.existsById(customerId)) {
             logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
@@ -219,7 +219,7 @@ public class StaffController {
     @PreAuthorize("hasRole('TECHNICAL') OR hasRole('MANAGER')")
     public VpsResponse getVPSById(@CurrentUser UserPrincipal currentUser,
                                   @PathVariable Long customerId,
-                                  @PathVariable Long vpsId) {
+                                  @PathVariable ServiceIdentity vpsId) {
 
         if (!userRepository.existsById(customerId)) {
             logService.createLog("GET_VPS_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
@@ -281,7 +281,7 @@ public class StaffController {
     public PagedResponse<ServiceIPResponse> getServiceIPs(@CurrentUser UserPrincipal currentUser,
                                                           @PathVariable Long customerId,
                                                           @PathVariable String serviceType,
-                                                          @PathVariable Long serviceId,
+                                                          @PathVariable ServiceIdentity serviceId,
                                                           @RequestParam(value = "page",
                                                                   defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                           @RequestParam(value = "size",
@@ -329,7 +329,7 @@ public class StaffController {
     public ServiceIPResponse getServiceIPById(@CurrentUser UserPrincipal currentUser,
                                               @PathVariable Long customerId,
                                               @PathVariable String serviceType,
-                                              @PathVariable Long serviceId,
+                                              @PathVariable ServiceIdentity serviceId,
                                               @PathVariable Long IPId) {
 
         if (!userRepository.existsById(customerId)) {
@@ -380,7 +380,7 @@ public class StaffController {
                                              @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                                              @PathVariable Long customerId,
                                              @PathVariable String serviceType,
-                                             @PathVariable Long serviceId,
+                                             @PathVariable ServiceIdentity serviceId,
                                              @PathVariable Long ipId,
                                              @CurrentUser UserPrincipal currentUser) {
 
@@ -460,7 +460,7 @@ public class StaffController {
     @PreAuthorize("hasRole('TECHNICAL') OR hasRole('MANAGER')")
     public PagedResponse<ColocationDeviceResponse> getColocationDevices(@CurrentUser UserPrincipal currentUser,
                                                                           @PathVariable Long customerId,
-                                                                          @PathVariable Long colocationId,
+                                                                          @PathVariable ServiceIdentity colocationId,
                                                                           @RequestParam(value = "page",
                                                                                   defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                                           @RequestParam(value = "size",
@@ -502,7 +502,7 @@ public class StaffController {
     @PreAuthorize("hasRole('TECHNICAL') OR hasRole('MANAGER')")
     public ColocationDeviceResponse getColocationDeviceById(@CurrentUser UserPrincipal currentUser,
                                                               @PathVariable Long customerId,
-                                                              @PathVariable Long colocationId,
+                                                              @PathVariable ServiceIdentity colocationId,
                                                               @PathVariable Long deviceId) {
 
         if (!userRepository.existsById(customerId)) {
@@ -546,7 +546,7 @@ public class StaffController {
     public PagedResponse<ServicePortResponse> getServicePorts(@CurrentUser UserPrincipal currentUser,
                                                               @PathVariable Long customerId,
                                                               @PathVariable String serviceType,
-                                                              @PathVariable Long serviceId,
+                                                              @PathVariable ServiceIdentity serviceId,
                                                               @RequestParam(value = "page",
                                                                       defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                               @RequestParam(value = "size",
@@ -593,7 +593,7 @@ public class StaffController {
     public ServicePortResponse getServicePortById(@CurrentUser UserPrincipal currentUser,
                                                   @PathVariable Long customerId,
                                                   @PathVariable String serviceType,
-                                                  @PathVariable Long serviceId,
+                                                  @PathVariable ServiceIdentity serviceId,
                                                   @PathVariable Long portId) {
 
         if (!userRepository.existsById(customerId)) {
@@ -640,7 +640,7 @@ public class StaffController {
     public PagedResponse<ServiceTicketResponse> getServiceTickets(@CurrentUser UserPrincipal currentUser,
                                                                   @PathVariable Long customerId,
                                                                   @PathVariable String serviceType,
-                                                                  @PathVariable Long serviceId,
+                                                                  @PathVariable ServiceIdentity serviceId,
                                                                   @RequestParam(value = "page",
                                                                           defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                                   @RequestParam(value = "size",
@@ -688,7 +688,7 @@ public class StaffController {
     public ServiceTicketResponse getServiceTicketById(@CurrentUser UserPrincipal currentUser,
                                                       @PathVariable Long customerId,
                                                       @PathVariable String serviceType,
-                                                      @PathVariable Long serviceId,
+                                                      @PathVariable ServiceIdentity serviceId,
                                                       @PathVariable Long ticketId) {
         if (!userRepository.existsById(customerId)) {
             logService.createLog("GET_SERVICE_TICKET_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
@@ -734,7 +734,7 @@ public class StaffController {
     public PagedResponse<ServiceBillingResponse> getServiceBillings(@CurrentUser UserPrincipal currentUser,
                                                                     @PathVariable Long customerId,
                                                                     @PathVariable String serviceType,
-                                                                    @PathVariable Long serviceId,
+                                                                    @PathVariable ServiceIdentity serviceId,
                                                                     @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                                     @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
 
@@ -781,7 +781,7 @@ public class StaffController {
     public ServiceBillingResponse getServiceBillingById(@CurrentUser UserPrincipal currentUser,
                                                         @PathVariable Long customerId,
                                                         @PathVariable String serviceType,
-                                                        @PathVariable Long serviceId,
+                                                        @PathVariable ServiceIdentity serviceId,
                                                         @PathVariable Long billingId) {
 
         if (!userRepository.existsById(customerId)) {
@@ -859,7 +859,7 @@ public class StaffController {
     @GetMapping("/colocations/{colocationId}")
     @PreAuthorize("hasRole('OFFICE') OR hasRole('MANAGER') OR hasRole('TECHNICAL')")
     public ColocationResponse getColocationById(@CurrentUser UserPrincipal currentUser,
-                                                  @PathVariable Long colocationId) {
+                                                  @PathVariable ServiceIdentity colocationId) {
 
         return nsService.getColocationById(colocationId, currentUser);
     }
@@ -873,7 +873,7 @@ public class StaffController {
     @GetMapping("/vps/{vpsId}")
     @PreAuthorize("hasRole('OFFICE') OR hasRole('MANAGER') OR hasRole('TECHNICAL')")
     public VpsResponse getVPSById(@CurrentUser UserPrincipal currentUser,
-                                  @PathVariable Long vpsId) {
+                                  @PathVariable ServiceIdentity vpsId) {
 
         return nsService.getVPSById(vpsId, currentUser);
     }
@@ -899,7 +899,7 @@ public class StaffController {
                                               @RequestParam("description") String description,
                                               @PathVariable Long customerId,
                                               @PathVariable String serviceType,
-                                              @PathVariable Long serviceId) {
+                                              @PathVariable ServiceIdentity serviceId) {
 
         if (!userRepository.existsById(customerId)) {
             logService.createLog("CALCULATE_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
@@ -966,7 +966,7 @@ public class StaffController {
                                                       @CurrentUser UserPrincipal currentUser,
                                                       @PathVariable Long customerId,
                                                       @PathVariable String serviceType,
-                                                      @PathVariable Long serviceId,
+                                                      @PathVariable ServiceIdentity serviceId,
                                                       @PathVariable Long billingId) {
 
         if (!userRepository.existsById(customerId)) {
@@ -1019,7 +1019,7 @@ public class StaffController {
     public Billing getLastPaidBilling(@CurrentUser UserPrincipal currentUser,
                                       @PathVariable String serviceType,
                                       @PathVariable Long customerId,
-                                      @PathVariable Long serviceId) {
+                                      @PathVariable ServiceIdentity serviceId) {
 
         if (!userRepository.existsById(customerId)) {
             logService.createLog("GET_LAST_PAID_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,

@@ -5,6 +5,7 @@ import org.redapps.netmon.exception.BadRequestException;
 import org.redapps.netmon.exception.ResourceNotFoundException;
 import org.redapps.netmon.model.Device;
 import org.redapps.netmon.model.NetmonService;
+import org.redapps.netmon.model.ServiceIdentity;
 import org.redapps.netmon.payload.DeviceRequest;
 import org.redapps.netmon.payload.ColocationDeviceResponse;
 import org.redapps.netmon.payload.DeviceStatusRequest;
@@ -48,7 +49,7 @@ public class DeviceService {
      * @param colocationId the unique colocation number
      * @return a new device object
      */
-    public Device create(DeviceRequest colocationDeviceRequest, UserPrincipal currentUser, Long colocationId) {
+    public Device create(DeviceRequest colocationDeviceRequest, UserPrincipal currentUser, ServiceIdentity colocationId) {
 
         // find service by id
         NetmonService netmonService = colocationRepository.getOne(colocationId);
@@ -152,7 +153,7 @@ public class DeviceService {
      * @return list of devices
      */
     public PagedResponse<ColocationDeviceResponse> getColocationDevices(UserPrincipal currentUser,
-                                                                          long colocationId,
+                                                                          ServiceIdentity colocationId,
                                                                           int page, int size) {
         validatePageNumberAndSize(page, size);
 

@@ -3,6 +3,7 @@ package org.redapps.netmon.service;
 import org.redapps.netmon.exception.BadRequestException;
 import org.redapps.netmon.exception.ResourceNotFoundException;
 import org.redapps.netmon.model.NetmonService;
+import org.redapps.netmon.model.ServiceIdentity;
 import org.redapps.netmon.model.Ticket;
 import org.redapps.netmon.payload.PagedResponse;
 import org.redapps.netmon.payload.ServiceTicketRequest;
@@ -44,7 +45,7 @@ public class TicketService {
      * @param serviceId the unique service number
      * @return ticket response
      */
-    public Ticket create(ServiceTicketRequest serviceTicketRequest, UserPrincipal currentUser , Long serviceId) {
+    public Ticket create(ServiceTicketRequest serviceTicketRequest, UserPrincipal currentUser , ServiceIdentity serviceId) {
 
         // find service
         NetmonService netmonService = netmonServiceRepository.getOne(serviceId);
@@ -71,7 +72,7 @@ public class TicketService {
      * @return ticket responses page by page
      */
     public PagedResponse<ServiceTicketResponse> getServiceTickets(UserPrincipal currentUser,
-                                                                  Long serviceId, int page, int size) {
+                                                                  ServiceIdentity serviceId, int page, int size) {
         validatePageNumberAndSize(page, size);
 
         // find all tickets sorted by createdAt

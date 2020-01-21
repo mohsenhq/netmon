@@ -15,9 +15,9 @@ import java.time.LocalDate;
 @Table(name = "services")
 public class NetmonService extends UserDateAudit {
 
-    @Id
+    
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    ServiceIdentity serviceIdentity;
 
     private String slaType;
     private String description;
@@ -177,12 +177,13 @@ public class NetmonService extends UserDateAudit {
         this.company = company;
     }
 
-    public Long getId() {
-        return id;
+    @Id
+    public ServiceIdentity getId() {
+        return serviceIdentity;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setId(ServiceIdentity serviceIdentity) {
+        this.serviceIdentity = serviceIdentity;
     }
 
     public String getSlaType() {

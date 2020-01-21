@@ -28,7 +28,10 @@ public class Device extends UserDateAudit {
     private NetmonStatus.DEVICE_STATUS status;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "service_id", nullable = false)
+    @JoinColumns ({
+        @JoinColumn(name = "service_id", nullable = false),
+        @JoinColumn(name = "CREATE_DATE", nullable = false)
+    })
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private NetmonService netmonService;
