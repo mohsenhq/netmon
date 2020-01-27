@@ -11,6 +11,7 @@ import org.redapps.netmon.util.AppConstants;
 import org.redapps.netmon.util.NetmonStatus;
 import org.redapps.netmon.util.NetmonTypes;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.redapps.netmon.exception.AccessDeniedException;
@@ -20,6 +21,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @RestController
@@ -29,8 +31,8 @@ public class TechnicalController {
     private final IPService ipService;
     private final ServiceIPRepository serviceIPRepository;
     private final NetmonServiceRepository netmonServiceRepository;
-    private final DeviceService colocationDeviceService;
-    private final ColocationDeviceRepository colocationDeviceRepository;
+//     private final DeviceService colocationDeviceService;
+//     private final ColocationDeviceRepository colocationDeviceRepository;
     private final ServicePortRepository servicePortRepository;
     private final PortService portService;
     private final TicketService ticketService;
@@ -43,8 +45,10 @@ public class TechnicalController {
 
     @Autowired
     public TechnicalController(ServiceIPRepository serviceIPRepository, NetmonServiceRepository netmonServiceRepository,
-                               DeviceService colocationDeviceService,  OSTypeService osTypeService,
-                               ColocationDeviceRepository colocationDeviceRepository, LogService logService,
+                        //        DeviceService colocationDeviceService,  
+                               OSTypeService osTypeService,
+                        //        ColocationDeviceRepository colocationDeviceRepository, 
+                               LogService logService,
                                ServicePortRepository servicePortRepository,
                                ServiceTicketRepository serviceTicketRepository, IPService ipService,
                                PortService portService, TicketService ticketService,
@@ -52,8 +56,8 @@ public class TechnicalController {
                                NSService nsService) {
         this.serviceIPRepository = serviceIPRepository;
         this.netmonServiceRepository = netmonServiceRepository;
-        this.colocationDeviceService = colocationDeviceService;
-        this.colocationDeviceRepository = colocationDeviceRepository;
+        // this.colocationDeviceService = colocationDeviceService;
+        // this.colocationDeviceRepository = colocationDeviceRepository;
         this.osTypeService = osTypeService;
         this.logService = logService;
         this.servicePortRepository = servicePortRepository;
@@ -145,7 +149,7 @@ public class TechnicalController {
                                              @CurrentUser UserPrincipal currentUser,
                                              @PathVariable Long customerId,
                                              @PathVariable String serviceType,
-                                             @PathVariable ServiceIdentity serviceId) {
+                                             @PathVariable Long serviceId) {
 
         initialChecking("CREATE_COLOCATION_IP", currentUser.getUsername(), customerId,
                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + "]",
@@ -160,7 +164,8 @@ public class TechnicalController {
                     HttpStatus.BAD_REQUEST);
         }
 
-        IP serviceIp = ipService.create(serviceIPRequest, currentUser, serviceId);
+        LocalDate createDate = LocalDate.now();                                
+        IP serviceIp = ipService.create(serviceIPRequest, currentUser, serviceId, createDate);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{ipId}")
@@ -184,7 +189,7 @@ public class TechnicalController {
     public ResponseEntity<?> deleteServiceIP(@CurrentUser UserPrincipal currentUser,
                                              @PathVariable Long customerId,
                                              @PathVariable String serviceType,
-                                             @PathVariable ServiceIdentity serviceId,
+                                             @PathVariable Long serviceId,
                                              @PathVariable Long ipId) {
 
         initialChecking("DELETE_SERVICE_IP", currentUser.getUsername(), customerId,
@@ -227,7 +232,7 @@ public class TechnicalController {
                                              @PathVariable Long customerId,
                                              @PathVariable String serviceType,
                                              @PathVariable Long ipId,
-                                             @PathVariable ServiceIdentity serviceId) {
+                                             @PathVariable Long serviceId) {
 
         initialChecking("UPDATE_SERVICE_IP", currentUser.getUsername(), customerId,
                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + ipId + "]",
@@ -259,150 +264,150 @@ public class TechnicalController {
                 .body(new ApiResponse(true, "The IP updated successfully."));
     }
 
-    /**
-     * Create a new colocation device
-     * @param colocationDeviceRequest the device information object the device information object
-     * @param currentUser the user id who currently logged in
-     * @param customerId the customer unique number who requested the service
-     * @param colocationId the unique colocation number
-     * @return OK response or report error
-     */
-    @PostMapping("/customers/{customerId}/colocations/{colocationId}/devices/new")
-    @PreAuthorize("hasRole('TECHNICAL')")
-    public ResponseEntity<?> createColocationDevice(@Valid @RequestBody DeviceRequest colocationDeviceRequest,
-                                                     @CurrentUser UserPrincipal currentUser,
-                                                     @PathVariable Long customerId,
-                                                     @PathVariable ServiceIdentity colocationId) {
+//     /**
+//      * Create a new colocation device
+//      * @param colocationDeviceRequest the device information object the device information object
+//      * @param currentUser the user id who currently logged in
+//      * @param customerId the customer unique number who requested the service
+//      * @param colocationId the unique colocation number
+//      * @return OK response or report error
+//      */
+//     @PostMapping("/customers/{customerId}/colocations/{colocationId}/devices/new")
+//     @PreAuthorize("hasRole('TECHNICAL')")
+//     public ResponseEntity<?> createColocationDevice(@Valid @RequestBody DeviceRequest colocationDeviceRequest,
+//                                                      @CurrentUser UserPrincipal currentUser,
+//                                                      @PathVariable Long customerId,
+//                                                      @PathVariable Long colocationId) {
 
-        initialChecking("UPDATE_SERVICE_IP", currentUser.getUsername(), customerId,
-                "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId + "]",
-                colocationDeviceRequest.toString());
+//         initialChecking("UPDATE_SERVICE_IP", currentUser.getUsername(), customerId,
+//                 "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId + "]",
+//                 colocationDeviceRequest.toString());
 
-        Device colocationDevice = colocationDeviceService.create(colocationDeviceRequest, currentUser,
-                colocationId);
+//         Device colocationDevice = colocationDeviceService.create(colocationDeviceRequest, currentUser,
+//                 colocationId);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{deviceId}")
-                .buildAndExpand(colocationDevice.getId()).toUri();
+//         URI location = ServletUriComponentsBuilder
+//                 .fromCurrentRequest().path("/{deviceId}")
+//                 .buildAndExpand(colocationDevice.getId()).toUri();
 
-        return ResponseEntity.created(location)
-                .body(new ApiResponse(true, "The device created successfully."));
-    }
+//         return ResponseEntity.created(location)
+//                 .body(new ApiResponse(true, "The device created successfully."));
+//     }
 
-    /**
-     * Delete a device
-     * @param currentUser the user id who currently logged in
-     * @param customerId the customer unique number who requested the service
-     * @param deviceId the unique device number
-     * @param colocationId the unique colocation number
-     * @return OK response or report error
-     */
-    @DeleteMapping("/customers/{customerId}/colocations/{colocationId}/devices/{deviceId}/delete")
-    @PreAuthorize("hasRole('TECHNICAL')")
-    public ResponseEntity<?> deleteColocationDevice(@CurrentUser UserPrincipal currentUser,
-                                                     @PathVariable Long customerId,
-                                                     @PathVariable Long deviceId,
-                                                     @PathVariable ServiceIdentity colocationId) {
+//     /**
+//      * Delete a device
+//      * @param currentUser the user id who currently logged in
+//      * @param customerId the customer unique number who requested the service
+//      * @param deviceId the unique device number
+//      * @param colocationId the unique colocation number
+//      * @return OK response or report error
+//      */
+//     @DeleteMapping("/customers/{customerId}/colocations/{colocationId}/devices/{deviceId}/delete")
+//     @PreAuthorize("hasRole('TECHNICAL')")
+//     public ResponseEntity<?> deleteColocationDevice(@CurrentUser UserPrincipal currentUser,
+//                                                      @PathVariable Long customerId,
+//                                                      @PathVariable Long deviceId,
+//                                                      @PathVariable Long colocationId) {
 
-        initialChecking("UPDATE_SERVICE_IP", currentUser.getUsername(), customerId,
-                "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId
-                        + ",deviceId=" + deviceId + "]", "");
+//         initialChecking("UPDATE_SERVICE_IP", currentUser.getUsername(), customerId,
+//                 "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId
+//                         + ",deviceId=" + deviceId + "]", "");
 
-        if (!colocationDeviceRepository.existsByIdAndNetmonServiceId(deviceId, colocationId)) {
-            logService.createLog("DELETE_COLOCATION_DEVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",colocationId=" + colocationId + ",deviceId=" + deviceId + "]", "",
-                    "The device does not exists.");
-            return new ResponseEntity<>(new ApiResponse(false, "The device does not exists."),
-                    HttpStatus.BAD_REQUEST);
-        }
+//         if (!colocationDeviceRepository.existsByIdAndNetmonServiceId(deviceId, colocationId)) {
+//             logService.createLog("DELETE_COLOCATION_DEVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[customerId=" + customerId + ",colocationId=" + colocationId + ",deviceId=" + deviceId + "]", "",
+//                     "The device does not exists.");
+//             return new ResponseEntity<>(new ApiResponse(false, "The device does not exists."),
+//                     HttpStatus.BAD_REQUEST);
+//         }
 
-        colocationDeviceService.delete(currentUser, deviceId);
+//         colocationDeviceService.delete(currentUser, deviceId);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{deviceId}")
-                .buildAndExpand(deviceId).toUri();
+//         URI location = ServletUriComponentsBuilder
+//                 .fromCurrentRequest().path("/{deviceId}")
+//                 .buildAndExpand(deviceId).toUri();
 
-        return ResponseEntity.created(location)
-                .body(new ApiResponse(true, "The device deleted successfully."));
-    }
+//         return ResponseEntity.created(location)
+//                 .body(new ApiResponse(true, "The device deleted successfully."));
+//     }
 
-    /**
-     * Update the name and description.
-     * @param deviceRequest
-     * @param currentUser the user id who currently logged in
-     * @param customerId the customer unique number who requested the service
-     * @param deviceId the unique device number
-     * @param colocationId the unique colocation number
-     * @return OK response or report error
-     */
-    @PutMapping("/customers/{customerId}/colocations/{colocationId}/devices/{deviceId}/update")
-    @PreAuthorize("hasRole('TECHNICAL')")
-    public ResponseEntity<?> updateColocationDevice(@Valid @RequestBody DeviceRequest deviceRequest,
-                                                     @CurrentUser UserPrincipal currentUser,
-                                                     @PathVariable Long customerId,
-                                                     @PathVariable Long deviceId,
-                                                     @PathVariable ServiceIdentity colocationId) {
+//     /**
+//      * Update the name and description.
+//      * @param deviceRequest
+//      * @param currentUser the user id who currently logged in
+//      * @param customerId the customer unique number who requested the service
+//      * @param deviceId the unique device number
+//      * @param colocationId the unique colocation number
+//      * @return OK response or report error
+//      */
+//     @PutMapping("/customers/{customerId}/colocations/{colocationId}/devices/{deviceId}/update")
+//     @PreAuthorize("hasRole('TECHNICAL')")
+//     public ResponseEntity<?> updateColocationDevice(@Valid @RequestBody DeviceRequest deviceRequest,
+//                                                      @CurrentUser UserPrincipal currentUser,
+//                                                      @PathVariable Long customerId,
+//                                                      @PathVariable Long deviceId,
+//                                                      @PathVariable Long colocationId) {
 
-        initialChecking("UPDATE_SERVICE_IP", currentUser.getUsername(), customerId,
-                "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId
-                        + ",deviceId=" + deviceId + "]", deviceRequest.toString());
+//         initialChecking("UPDATE_SERVICE_IP", currentUser.getUsername(), customerId,
+//                 "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId
+//                         + ",deviceId=" + deviceId + "]", deviceRequest.toString());
 
-        if (!colocationDeviceRepository.existsByIdAndNetmonServiceId(deviceId, colocationId)) {
-            logService.createLog("UPDATE_COLOCATION_DEVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",colocationId=" + colocationId + ",deviceId=" + deviceId + "]",
-                    deviceRequest.toString(), "This device does not belong to the service.");
-            return new ResponseEntity<>(new ApiResponse(false, "This device does not belong to the service."),
-                    HttpStatus.BAD_REQUEST);
-        }
+//         if (!colocationDeviceRepository.existsByIdAndNetmonServiceId(deviceId, colocationId)) {
+//             logService.createLog("UPDATE_COLOCATION_DEVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[customerId=" + customerId + ",colocationId=" + colocationId + ",deviceId=" + deviceId + "]",
+//                     deviceRequest.toString(), "This device does not belong to the service.");
+//             return new ResponseEntity<>(new ApiResponse(false, "This device does not belong to the service."),
+//                     HttpStatus.BAD_REQUEST);
+//         }
 
-        colocationDeviceService.update(deviceId, deviceRequest, currentUser);
+//         colocationDeviceService.update(deviceId, deviceRequest, currentUser);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{deviceId}")
-                .buildAndExpand(deviceId).toUri();
+//         URI location = ServletUriComponentsBuilder
+//                 .fromCurrentRequest().path("/{deviceId}")
+//                 .buildAndExpand(deviceId).toUri();
 
-        return ResponseEntity.created(location)
-                .body(new ApiResponse(true, "The device updated successfully."));
-    }
+//         return ResponseEntity.created(location)
+//                 .body(new ApiResponse(true, "The device updated successfully."));
+//     }
 
-    /**
-     * Change status
-     * @param deviceStatusRequest
-     * @param currentUser the user id who currently logged in
-     * @param customerId the customer unique number who requested the service
-     * @param deviceId the unique device number
-     * @param colocationId the unique colocation number
-     * @return OK response or report error
-     */
-    @PutMapping("/customers/{customerId}/colocations/{colocationId}/devices/{deviceId}/status")
-    @PreAuthorize("hasRole('TECHNICAL')")
-    public ResponseEntity<?> changingColocationDeviceStatus(@Valid @RequestBody DeviceStatusRequest deviceStatusRequest,
-                                                             @CurrentUser UserPrincipal currentUser,
-                                                             @PathVariable Long customerId,
-                                                             @PathVariable Long deviceId,
-                                                             @PathVariable ServiceIdentity colocationId) {
+//     /**
+//      * Change status
+//      * @param deviceStatusRequest
+//      * @param currentUser the user id who currently logged in
+//      * @param customerId the customer unique number who requested the service
+//      * @param deviceId the unique device number
+//      * @param colocationId the unique colocation number
+//      * @return OK response or report error
+//      */
+//     @PutMapping("/customers/{customerId}/colocations/{colocationId}/devices/{deviceId}/status")
+//     @PreAuthorize("hasRole('TECHNICAL')")
+//     public ResponseEntity<?> changingColocationDeviceStatus(@Valid @RequestBody DeviceStatusRequest deviceStatusRequest,
+//                                                              @CurrentUser UserPrincipal currentUser,
+//                                                              @PathVariable Long customerId,
+//                                                              @PathVariable Long deviceId,
+//                                                              @PathVariable Long colocationId) {
 
-        initialChecking("CHANGE_COLOCATION_DEVICE_STATUS", currentUser.getUsername(), customerId,
-                "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId
-                        + ",deviceId=" + deviceId + "]", deviceStatusRequest.toString());
+//         initialChecking("CHANGE_COLOCATION_DEVICE_STATUS", currentUser.getUsername(), customerId,
+//                 "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId
+//                         + ",deviceId=" + deviceId + "]", deviceStatusRequest.toString());
 
-        if (!colocationDeviceRepository.existsByIdAndNetmonServiceId(deviceId, colocationId)) {
-            logService.createLog("CHANGE_COLOCATION_DEVICE_STATUS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",colocationId=" + colocationId + ",deviceId=" + deviceId + "]",
-                    deviceStatusRequest.toString(), "This device does not belong to the service.");
-            return new ResponseEntity<>(new ApiResponse(false, "This device does not belong to the service."),
-                    HttpStatus.BAD_REQUEST);
-        }
+//         if (!colocationDeviceRepository.existsByIdAndNetmonServiceId(deviceId, colocationId)) {
+//             logService.createLog("CHANGE_COLOCATION_DEVICE_STATUS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[customerId=" + customerId + ",colocationId=" + colocationId + ",deviceId=" + deviceId + "]",
+//                     deviceStatusRequest.toString(), "This device does not belong to the service.");
+//             return new ResponseEntity<>(new ApiResponse(false, "This device does not belong to the service."),
+//                     HttpStatus.BAD_REQUEST);
+//         }
 
-        colocationDeviceService.changeStatus(deviceId, deviceStatusRequest, currentUser);
+//         colocationDeviceService.changeStatus(deviceId, deviceStatusRequest, currentUser);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{deviceId}")
-                .buildAndExpand(deviceId).toUri();
+//         URI location = ServletUriComponentsBuilder
+//                 .fromCurrentRequest().path("/{deviceId}")
+//                 .buildAndExpand(deviceId).toUri();
 
-        return ResponseEntity.created(location)
-                .body(new ApiResponse(true, "The device updated successfully"));
-    }
+//         return ResponseEntity.created(location)
+//                 .body(new ApiResponse(true, "The device updated successfully"));
+//     }
 
     /**
      * Create a new service port
@@ -419,12 +424,13 @@ public class TechnicalController {
                                                @CurrentUser UserPrincipal currentUser,
                                                @PathVariable Long customerId,
                                                @PathVariable String serviceType,
-                                               @PathVariable ServiceIdentity serviceId) {
+                                               @PathVariable Long serviceId) {
 
         initialChecking("CREATE_SERVICE_PORT", currentUser.getUsername(), customerId,
                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + "]",
                 servicePortRequest.toString());
 
+        LocalDate createDate = LocalDate.now();                                
         if (servicePortRepository.existsByPortAndNetmonServiceId(servicePortRequest.getPort(), serviceId)) {
             logService.createLog("CREATE_SERVICE_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
                     "[customerId=" + customerId + ",serviceId=" + serviceId + "]", servicePortRequest.toString(),
@@ -433,7 +439,7 @@ public class TechnicalController {
                     HttpStatus.BAD_REQUEST);
         }
 
-        Port servicePort = portService.create(servicePortRequest, currentUser, serviceId);
+        Port servicePort = portService.create(servicePortRequest, currentUser, serviceId, createDate);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{portId}")
@@ -457,7 +463,7 @@ public class TechnicalController {
     public ResponseEntity<?> deleteServicePort(@CurrentUser UserPrincipal currentUser,
                                                @PathVariable Long customerId,
                                                @PathVariable String serviceType,
-                                               @PathVariable ServiceIdentity serviceId,
+                                               @PathVariable Long serviceId,
                                                @PathVariable Long portId) {
         initialChecking("DELETE_SERVICE_PORT", currentUser.getUsername(), customerId,
                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" +
@@ -482,53 +488,53 @@ public class TechnicalController {
 
     }
 
-    /**
-     * Change the service port
-     * @param servicePortRequest the port information object
-     * @param currentUser the user id who currently logged in
-     * @param customerId the customer unique number who requested the service
-     * @param serviceType vps / collocation
-     * @param portId the unique port number
-     * @param serviceId the unique service number
-     * @return OK response or report error
-     */
-    @PutMapping("/customers/{customerId}/{serviceType}/{serviceId}/ports/{portId}/update")
-    @PreAuthorize("hasRole('TECHNICAL')")
-    public ResponseEntity<?> updateServicePort(@Valid @RequestBody ServicePortRequest servicePortRequest,
-                                               @CurrentUser UserPrincipal currentUser,
-                                               @PathVariable Long customerId,
-                                               @PathVariable String serviceType,
-                                               @PathVariable Long portId,
-                                               @PathVariable ServiceIdentity serviceId) {
-        initialChecking("UPDATE_SERVICE_PORT", currentUser.getUsername(), customerId,
-                serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId +
-                        ",portId=" + portId + "]", servicePortRequest.toString());
+//     /**
+//      * Change the service port
+//      * @param servicePortRequest the port information object
+//      * @param currentUser the user id who currently logged in
+//      * @param customerId the customer unique number who requested the service
+//      * @param serviceType vps / collocation
+//      * @param portId the unique port number
+//      * @param serviceId the unique service number
+//      * @return OK response or report error
+//      */
+//     @PutMapping("/customers/{customerId}/{serviceType}/{serviceId}/ports/{portId}/update")
+//     @PreAuthorize("hasRole('TECHNICAL')")
+//     public ResponseEntity<?> updateServicePort(@Valid @RequestBody ServicePortRequest servicePortRequest,
+//                                                @CurrentUser UserPrincipal currentUser,
+//                                                @PathVariable Long customerId,
+//                                                @PathVariable String serviceType,
+//                                                @PathVariable Long portId,
+//                                                @PathVariable Long serviceId) {
+//         initialChecking("UPDATE_SERVICE_PORT", currentUser.getUsername(), customerId,
+//                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId +
+//                         ",portId=" + portId + "]", servicePortRequest.toString());
+//         LocalDate createDate = LocalDate.now();
+//         if (!servicePortRepository.existsByIdAndNetmonServiceId(portId, serviceId)) {
+//             logService.createLog("UPDATE_SERVICE_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[customerId=" + customerId + ",serviceId=" + serviceId + ",portId=" + portId + "]",
+//                     servicePortRequest.toString(), "This port does not belong to the service.");
+//             return new ResponseEntity<>(new ApiResponse(false, "This port does not belong to the service."),
+//                     HttpStatus.BAD_REQUEST);
+//         }
 
-        if (!servicePortRepository.existsByIdAndNetmonServiceId(portId, serviceId)) {
-            logService.createLog("UPDATE_SERVICE_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",portId=" + portId + "]",
-                    servicePortRequest.toString(), "This port does not belong to the service.");
-            return new ResponseEntity<>(new ApiResponse(false, "This port does not belong to the service."),
-                    HttpStatus.BAD_REQUEST);
-        }
+//         if (servicePortRepository.existsByPortAndNetmonServiceId(servicePortRequest.getPort(), serviceId)) {
+//             logService.createLog("UPDATE_SERVICE_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[customerId=" + customerId + ",serviceId=" + serviceId + ",portId=" + portId + "]",
+//                     servicePortRequest.toString(), "This port is already assigned.");
+//             return new ResponseEntity<>(new ApiResponse(false, "This port is already assigned."),
+//                     HttpStatus.BAD_REQUEST);
+//         }
 
-        if (servicePortRepository.existsByPortAndNetmonServiceId(servicePortRequest.getPort(), serviceId)) {
-            logService.createLog("UPDATE_SERVICE_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",portId=" + portId + "]",
-                    servicePortRequest.toString(), "This port is already assigned.");
-            return new ResponseEntity<>(new ApiResponse(false, "This port is already assigned."),
-                    HttpStatus.BAD_REQUEST);
-        }
+//         portService.update(currentUser, portId, servicePortRequest);
 
-        portService.update(currentUser, portId, servicePortRequest);
+//         URI location = ServletUriComponentsBuilder
+//                 .fromCurrentRequest().path("/{portId}")
+//                 .buildAndExpand(portId).toUri();
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{portId}")
-                .buildAndExpand(portId).toUri();
-
-        return ResponseEntity.created(location)
-                .body(new ApiResponse(true, "The port updated successfully."));
-    }
+//         return ResponseEntity.created(location)
+//                 .body(new ApiResponse(true, "The port updated successfully."));
+//     }
 
     /**
      * Setting the ticket response
@@ -546,7 +552,7 @@ public class TechnicalController {
                                                @CurrentUser UserPrincipal currentUser,
                                                @PathVariable Long customerId,
                                                @PathVariable String serviceType,
-                                               @PathVariable ServiceIdentity serviceId,
+                                               @PathVariable Long serviceId,
                                                @PathVariable Long ticketId) {
         initialChecking("SET_TICKET_RESPONSE", currentUser.getUsername(), customerId,
                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + ",ticketId="
@@ -694,7 +700,7 @@ public class TechnicalController {
                                                           @CurrentUser UserPrincipal currentUser,
                                                           @PathVariable Long customerId,
                                                           @PathVariable String serviceType,
-                                                          @PathVariable ServiceIdentity serviceId) {
+                                                          @PathVariable Long serviceId) {
 
         initialChecking("RENAME_SERVICE", currentUser.getUsername(), customerId,
                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + "]",
@@ -720,7 +726,7 @@ public class TechnicalController {
      * @param requestParams query parameters of request
      * @param bodyParams body parameters of request
      */
-    private void initialChecking(String action, String username, Long customerId, String serviceType, ServiceIdentity serviceId,
+    private void initialChecking(String action, String username, Long customerId, String serviceType, Long serviceId,
                                  String requestParams, String bodyParams){
 
         if (!userRepository.existsById(customerId)) {

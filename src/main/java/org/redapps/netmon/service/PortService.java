@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Vector;
+import java.time.LocalDate;
 
 @Service
 public class PortService {
@@ -42,7 +43,7 @@ public class PortService {
      * @param serviceId the unique service number
      * @return port response
      */
-    public Port create(ServicePortRequest servicePortRequest, UserPrincipal currentUser, ServiceIdentity serviceId) {
+    public Port create(ServicePortRequest servicePortRequest, UserPrincipal currentUser, Long serviceId, LocalDate createDate) {
 
         // create a new port object
         Port port = new Port();
@@ -52,7 +53,7 @@ public class PortService {
         port.setPort(servicePortRequest.getPort());
 
         // find the service by id and port assign to it
-        NetmonService netmonService = netmonServiceRepository.getOne(serviceId);
+        NetmonService netmonService = netmonServiceRepository.getOne(new ServiceIdentity(serviceId, createDate));
         port.setNetmonService(netmonService);
 
         logService.createLog("CREATE_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
@@ -108,7 +109,7 @@ public class PortService {
      * @param size the page size of each response (default value is 30)
      * @return port responses page by page
      */
-    public PagedResponse<ServicePortResponse> getServicePorts(UserPrincipal currentUser, ServiceIdentity serviceId,
+    public PagedResponse<ServicePortResponse> getServicePorts(UserPrincipal currentUser, Long serviceId,
                                                               int page, int size) {
         validatePageNumberAndSize(page, size);
 

@@ -13,11 +13,15 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "services")
+@IdClass(ServiceIdentity.class)
 public class NetmonService extends UserDateAudit {
 
-    
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    ServiceIdentity serviceIdentity;
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Id
+    private LocalDate createDate;
 
     private String slaType;
     private String description;
@@ -127,6 +131,7 @@ public class NetmonService extends UserDateAudit {
         this.osType = osType;
         this.price = price;
         this.finalPrice = price;
+        this.createDate = LocalDate.now();
     }
 
     public String getName() {
@@ -177,13 +182,20 @@ public class NetmonService extends UserDateAudit {
         this.company = company;
     }
 
-    @Id
-    public ServiceIdentity getId() {
-        return serviceIdentity;
+    public Long getId() {
+        return id;
     }
 
-    public void setId(ServiceIdentity serviceIdentity) {
-        this.serviceIdentity = serviceIdentity;
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public LocalDate getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(LocalDate createDate) {
+        this.createDate = createDate;
     }
 
     public String getSlaType() {

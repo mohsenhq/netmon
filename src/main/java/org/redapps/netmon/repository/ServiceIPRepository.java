@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,11 +15,11 @@ import java.util.Optional;
 public interface ServiceIPRepository extends JpaRepository<IP, Long> {
     Optional<IP> findById(Long id);
 
-    List<IP> findByNetmonServiceId(ServiceIdentity serviceId);
+    List<IP> findByNetmonServiceId(Long serviceId);
 
-    Page<IP> findByNetmonServiceId(ServiceIdentity serviceId, Pageable pageable);
+    Page<IP> findByNetmonServiceId(Long serviceId, Pageable pageable);
 
-    Boolean existsByIpAndNetmonServiceId(String ip, ServiceIdentity serviceId);
+    Boolean existsByIpAndNetmonServiceId(String ip, Long serviceId);
 
-    Boolean existsByIdAndNetmonServiceId(Long id, ServiceIdentity serviceId);
+    Boolean existsByIdAndNetmonServiceId(Long id, Long serviceId);
 }

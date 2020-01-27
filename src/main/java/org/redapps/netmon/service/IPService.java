@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Vector;
@@ -45,10 +46,10 @@ public class IPService {
      * @param serviceId the unique service number
      * @return ip
      */
-    public IP create(ServiceIPRequest serviceIPRequest, UserPrincipal currentUser , ServiceIdentity serviceId) {
+    public IP create(ServiceIPRequest serviceIPRequest, UserPrincipal currentUser , Long serviceId, LocalDate createDate) {
 
         // find service by id
-        NetmonService netmonService = netmonServiceRepository.getOne(serviceId);
+        NetmonService netmonService = netmonServiceRepository.getOne(new ServiceIdentity(serviceId, createDate));
 
         // create a new ip object
         IP ip = new IP(serviceIPRequest.getIp(), serviceIPRequest.getDescription(), netmonService);
@@ -107,7 +108,7 @@ public class IPService {
      * @param size the page size of each response (default value is 30)
      * @return ip response page by page
      */
-    public PagedResponse<ServiceIPResponse> getServiceIps(ServiceIdentity serviceId, UserPrincipal currentUser,
+    public PagedResponse<ServiceIPResponse> getServiceIps(Long serviceId, UserPrincipal currentUser,
                                                           int page, int size) {
         validatePageNumberAndSize(page, size);
 

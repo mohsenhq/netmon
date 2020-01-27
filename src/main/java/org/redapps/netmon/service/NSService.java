@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.redapps.netmon.exception.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Vector;
@@ -33,142 +34,142 @@ public class NSService {
         this.netmonServiceRepository = netmonServiceRepository;
     }
 
-    /**
-     * @param currentUser the user id who currently logged in
-     * @param companyId the unique company number
-     * @param page the page number of the response (default value is 0)
-     * @param size the page size of each response (default value is 30)
-     * @return colocation response page by page
-     */
-    public PagedResponse<ColocationResponse> getCompanyColocations(UserPrincipal currentUser,
-                                                                     long companyId, int page, int size) {
-        validatePageNumberAndSize(page, size);
+//     /**
+//      * @param currentUser the user id who currently logged in
+//      * @param companyId the unique company number
+//      * @param page the page number of the response (default value is 0)
+//      * @param size the page size of each response (default value is 30)
+//      * @return colocation response page by page
+//      */
+//     public PagedResponse<ColocationResponse> getCompanyColocations(UserPrincipal currentUser,
+//                                                                      long companyId, int page, int size) {
+//         validatePageNumberAndSize(page, size);
 
-        // find all colocations by company id
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        Page<NetmonService> netmonServicesPage = netmonServiceRepository.findAllByServiceTypeAndCompanyId(
-                NetmonTypes.SERVICE_TYPES.COLOCATION, companyId, pageable);
+//         // find all colocations by company id
+//         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+//         Page<NetmonService> netmonServicesPage = netmonServiceRepository.findAllByServiceTypeAndCompanyId(
+//                 NetmonTypes.SERVICE_TYPES.COLOCATION, companyId, pageable);
 
-        if (netmonServicesPage.getNumberOfElements() == 0) {
-            return new PagedResponse<>(Collections.emptyList(), netmonServicesPage.getNumber(),
-                    netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(), netmonServicesPage.isLast());
-        }
+//         if (netmonServicesPage.getNumberOfElements() == 0) {
+//             return new PagedResponse<>(Collections.emptyList(), netmonServicesPage.getNumber(),
+//                     netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(), netmonServicesPage.isLast());
+//         }
 
-        // store colocations into a list
-        Vector<ColocationResponse> colocationResponses = new Vector<>(10);
-        ColocationResponse colocationResponse;
-        for (NetmonService netmonService : netmonServicesPage) {
-            colocationResponse = new ColocationResponse(netmonService.getId(), netmonService.getName(),
-                    netmonService.getUnitNumber(), netmonService.getSlaType(),
-                    netmonService.getDescription(), netmonService.getValidIp(), netmonService.getInvalidIp(),
-                    netmonService.getStatus(), netmonService.getUsageType(), netmonService.getRackPosition(),
-                    netmonService.getOsType().getId(), netmonService.getStartDate(), netmonService.getDuration(),
-                    netmonService.getDiscountPercent());
+//         // store colocations into a list
+//         Vector<ColocationResponse> colocationResponses = new Vector<>(10);
+//         ColocationResponse colocationResponse;
+//         for (NetmonService netmonService : netmonServicesPage) {
+//             colocationResponse = new ColocationResponse(netmonService.getId(), netmonService.getName(),
+//                     netmonService.getUnitNumber(), netmonService.getSlaType(),
+//                     netmonService.getDescription(), netmonService.getValidIp(), netmonService.getInvalidIp(),
+//                     netmonService.getStatus(), netmonService.getUsageType(), netmonService.getRackPosition(),
+//                     netmonService.getOsType().getId(), netmonService.getStartDate(), netmonService.getDuration(),
+//                     netmonService.getDiscountPercent());
 
-            colocationResponses.add(colocationResponse);
-        }
+//             colocationResponses.add(colocationResponse);
+//         }
 
-        logService.createLog("GET_ALL_COLOCATIONS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
-                "[companyId=" + companyId + "]", "", "");
+//         logService.createLog("GET_ALL_COLOCATIONS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
+//                 "[companyId=" + companyId + "]", "", "");
 
-        return new PagedResponse<>(colocationResponses, netmonServicesPage.getNumber(),
-                netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(), netmonServicesPage.isLast());
-    }
+//         return new PagedResponse<>(colocationResponses, netmonServicesPage.getNumber(),
+//                 netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(), netmonServicesPage.isLast());
+//     }
 
-    /**
-     * @param currentUser the user id who currently logged in
-     * @param page the page number of the response (default value is 0)
-     * @param size the page size of each response (default value is 30)
-     * @return colocation responses page by page
-     */
-    public PagedResponse<ColocationResponse> getAllColocations(UserPrincipal currentUser,
-                                                                 int page, int size) {
-        validatePageNumberAndSize(page, size);
+//     /**
+//      * @param currentUser the user id who currently logged in
+//      * @param page the page number of the response (default value is 0)
+//      * @param size the page size of each response (default value is 30)
+//      * @return colocation responses page by page
+//      */
+//     public PagedResponse<ColocationResponse> getAllColocations(UserPrincipal currentUser,
+//                                                                  int page, int size) {
+//         validatePageNumberAndSize(page, size);
 
-        // find all colocations (type = 0)
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        Page<NetmonService> netmonServicesPage = netmonServiceRepository.findAllByServiceType(0, pageable);
+//         // find all colocations (type = 0)
+//         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+//         Page<NetmonService> netmonServicesPage = netmonServiceRepository.findAllByServiceType(0, pageable);
 
-        if (netmonServicesPage.getNumberOfElements() == 0) {
-            return new PagedResponse<>(Collections.emptyList(), netmonServicesPage.getNumber(),
-                    netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(), netmonServicesPage.isLast());
-        }
+//         if (netmonServicesPage.getNumberOfElements() == 0) {
+//             return new PagedResponse<>(Collections.emptyList(), netmonServicesPage.getNumber(),
+//                     netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(), netmonServicesPage.isLast());
+//         }
 
-        // store colocations into a list
-        Vector<ColocationResponse> colocationResponses = new Vector<>(10);
-        ColocationResponse colocationResponse;
-        for (NetmonService netmonService : netmonServicesPage) {
-            colocationResponse = new ColocationResponse(netmonService.getId(), netmonService.getName(),
-                    netmonService.getUnitNumber(), netmonService.getSlaType(),
-                    netmonService.getDescription(), netmonService.getValidIp(), netmonService.getInvalidIp(),
-                    netmonService.getStatus(), netmonService.getUsageType(),  netmonService.getRackPosition(),
-                    netmonService.getOsType().getId(), netmonService.getStartDate(),
-                    netmonService.getDuration(), netmonService.getDiscountPercent());
+//         // store colocations into a list
+//         Vector<ColocationResponse> colocationResponses = new Vector<>(10);
+//         ColocationResponse colocationResponse;
+//         for (NetmonService netmonService : netmonServicesPage) {
+//             colocationResponse = new ColocationResponse(netmonService.getId(), netmonService.getName(),
+//                     netmonService.getUnitNumber(), netmonService.getSlaType(),
+//                     netmonService.getDescription(), netmonService.getValidIp(), netmonService.getInvalidIp(),
+//                     netmonService.getStatus(), netmonService.getUsageType(),  netmonService.getRackPosition(),
+//                     netmonService.getOsType().getId(), netmonService.getStartDate(),
+//                     netmonService.getDuration(), netmonService.getDiscountPercent());
 
-            colocationResponses.add(colocationResponse);
+//             colocationResponses.add(colocationResponse);
 
-        }
+//         }
 
-        logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS, "", "", "");
-        return new PagedResponse<>(colocationResponses, netmonServicesPage.getNumber(),
-                netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(),
-                netmonServicesPage.isLast());
-    }
+//         logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS, "", "", "");
+//         return new PagedResponse<>(colocationResponses, netmonServicesPage.getNumber(),
+//                 netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(),
+//                 netmonServicesPage.isLast());
+//     }
 
-    /**
-     * @param currentUser the user id who currently logged in
-     * @param colocationRequest the document information object
-     * @param company the company information object
-     * @param technicalPerson the technicalPerson information object
-     * @param osType the osType information object
-     * @return service
-     */
-    public NetmonService createColocation(UserPrincipal currentUser, ColocationRequest colocationRequest,
-                                           Company company, TechnicalPerson technicalPerson, OSType osType) {
+//     /**
+//      * @param currentUser the user id who currently logged in
+//      * @param colocationRequest the document information object
+//      * @param company the company information object
+//      * @param technicalPerson the technicalPerson information object
+//      * @param osType the osType information object
+//      * @return service
+//      */
+//     public NetmonService createColocation(UserPrincipal currentUser, ColocationRequest colocationRequest,
+//                                            Company company, TechnicalPerson technicalPerson, OSType osType) {
 
-        // create a new service object
-        NetmonService netmonService = new NetmonService(colocationRequest.getSlaType(),
-                colocationRequest.getDescription(),
-                colocationRequest.getName(),
-                NetmonTypes.SERVICE_TYPES.COLOCATION, colocationRequest.getUnitNumber(),
-                colocationRequest.getValidIp(), colocationRequest.getInvalidIp(), colocationRequest.getStartDate(),
-                colocationRequest.getDuration(), company, technicalPerson, osType);
+//         // create a new service object
+//         NetmonService netmonService = new NetmonService(colocationRequest.getSlaType(),
+//                 colocationRequest.getDescription(),
+//                 colocationRequest.getName(),
+//                 NetmonTypes.SERVICE_TYPES.COLOCATION, colocationRequest.getUnitNumber(),
+//                 colocationRequest.getValidIp(), colocationRequest.getInvalidIp(), colocationRequest.getStartDate(),
+//                 colocationRequest.getDuration(), company, technicalPerson, osType);
 
-        logService.createLog("CREATE_COLOCATION", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
-                "[companyId=" + company.getId() + "]", colocationRequest.toString(), "");
+//         logService.createLog("CREATE_COLOCATION", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
+//                 "[companyId=" + company.getId() + "]", colocationRequest.toString(), "");
 
-        // store the object
-        return netmonServiceRepository.save(netmonService);
-    }
+//         // store the object
+//         return netmonServiceRepository.save(netmonService);
+//     }
 
-    /**
-     * @param colocationId the unique colocation number
-     * @param currentUser the user id who currently logged in
-     * @return colocation response
-     */
-    public ColocationResponse getColocationById(ServiceIdentity colocationId, UserPrincipal currentUser) {
+//     /**
+//      * @param colocationId the unique colocation number
+//      * @param currentUser the user id who currently logged in
+//      * @return colocation response
+//      */
+//     public ColocationResponse getColocationById(Long colocationId, UserPrincipal currentUser) {
 
-        // find the colocation by id
-        Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(colocationId);
-        if (!netmonServiceOptional.isPresent()) {
-            logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[colocationId=" + colocationId + "]", "", "The colocation does not exists.");
-            throw new ResourceNotFoundException("colocation", "colocationId", colocationId);
-        }
+//         // find the colocation by id
+//         Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(colocationId);
+//         if (!netmonServiceOptional.isPresent()) {
+//             logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[colocationId=" + colocationId + "]", "", "The colocation does not exists.");
+//             throw new ResourceNotFoundException("colocation", "colocationId", colocationId);
+//         }
 
-        logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
-                "[colocationId=" + colocationId + "]", "", "");
+//         logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
+//                 "[colocationId=" + colocationId + "]", "", "");
 
-        NetmonService netmonService = netmonServiceOptional.get();
+//         NetmonService netmonService = netmonServiceOptional.get();
 
-        // create a new colocation response object
-        return new ColocationResponse(netmonService.getId(), netmonService.getName(),
-                netmonService.getUnitNumber(), netmonService.getSlaType(),
-                netmonService.getDescription(), netmonService.getValidIp(), netmonService.getInvalidIp(),
-                netmonService.getStatus(), netmonService.getUsageType(),
-                netmonService.getRackPosition(), netmonService.getOsType().getId(),
-                netmonService.getStartDate(), netmonService.getDuration(), netmonService.getDiscountPercent());
-    }
+//         // create a new colocation response object
+//         return new ColocationResponse(netmonService.getId(), netmonService.getName(),
+//                 netmonService.getUnitNumber(), netmonService.getSlaType(),
+//                 netmonService.getDescription(), netmonService.getValidIp(), netmonService.getInvalidIp(),
+//                 netmonService.getStatus(), netmonService.getUsageType(),
+//                 netmonService.getRackPosition(), netmonService.getOsType().getId(),
+//                 netmonService.getStartDate(), netmonService.getDuration(), netmonService.getDiscountPercent());
+//     }
 
     /**
      * @param currentUser the user id who currently logged in
@@ -291,7 +292,7 @@ public class NSService {
      * @param currentUser the user id who currently logged in
      * @return vps response
      */
-    public VpsResponse getVPSById(ServiceIdentity vpsId, UserPrincipal currentUser) {
+    public VpsResponse getVPSById(Long vpsId, UserPrincipal currentUser) {
 
         // find the service by id
         Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(vpsId);
@@ -323,7 +324,7 @@ public class NSService {
      * @param serviceConfirmRequest the service information object to confirm
      * @return a new service object
      */
-    public NetmonService managerConfirmService(UserPrincipal currentUser, ServiceIdentity serviceId,
+    public NetmonService managerConfirmService(UserPrincipal currentUser, Long serviceId,
                                                ServiceConfirmRequest serviceConfirmRequest) {
 
         // find the service by id
@@ -362,7 +363,7 @@ public class NSService {
      * @param serviceConfirmRequest the service information object to confirm
      * @return a new service object
      */
-    public NetmonService customerConfirmService(UserPrincipal currentUser, ServiceIdentity serviceId,
+    public NetmonService customerConfirmService(UserPrincipal currentUser, Long serviceId,
                                                 ServiceConfirmRequest serviceConfirmRequest) {
 
         // find the service by id
@@ -395,7 +396,7 @@ public class NSService {
      * @param renameServiceRequest the new name of service and start date
      * @return a new service object
      */
-    public NetmonService renameService(UserPrincipal currentUser, ServiceIdentity serviceId,
+    public NetmonService renameService(UserPrincipal currentUser, Long serviceId,
                                        RenameServiceRequest renameServiceRequest) {
 
         // find a service by id

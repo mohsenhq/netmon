@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Vector;
@@ -43,12 +44,13 @@ public class TicketService {
      * @param serviceTicketRequest the ticket information object
      * @param currentUser the user id who currently logged in
      * @param serviceId the unique service number
+     * @param createDate the service date
      * @return ticket response
      */
-    public Ticket create(ServiceTicketRequest serviceTicketRequest, UserPrincipal currentUser , ServiceIdentity serviceId) {
+    public Ticket create(ServiceTicketRequest serviceTicketRequest, UserPrincipal currentUser , Long serviceId,LocalDate createDate) {
 
         // find service
-        NetmonService netmonService = netmonServiceRepository.getOne(serviceId);
+        NetmonService netmonService = netmonServiceRepository.getOne(new ServiceIdentity(serviceId, createDate));
 
         // create a new ticket object
         Ticket serviceTicket = new Ticket(serviceTicketRequest.getTitle(), serviceTicketRequest.getDescription(),
@@ -72,7 +74,7 @@ public class TicketService {
      * @return ticket responses page by page
      */
     public PagedResponse<ServiceTicketResponse> getServiceTickets(UserPrincipal currentUser,
-                                                                  ServiceIdentity serviceId, int page, int size) {
+                                                                  Long serviceId, int page, int size) {
         validatePageNumberAndSize(page, size);
 
         // find all tickets sorted by createdAt

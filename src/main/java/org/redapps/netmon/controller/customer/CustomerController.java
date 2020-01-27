@@ -34,12 +34,12 @@ import java.util.Vector;
 public class CustomerController {
 
     private final NSService nsService;
-    private final DeviceService colocationDeviceService;
+//     private final DeviceService colocationDeviceService;
     private final IPService ipService;
     private final PortService portService;
     private final TechnicalPersonService technicalPersonService;
     private final TicketService ticketService;
-    private final BillingService billingService;
+    // private final BillingService billingService;
     private final DocumentService documentService;
     private final CompanyService companyService;
     private final LogService logService;
@@ -58,13 +58,15 @@ public class CustomerController {
 
     @Autowired
     public CustomerController(TechnicalPersonRepository technicalPersonRepository,
-                              DeviceService colocationDeviceService, OSTypeService osTypeService,
+                        //       DeviceService colocationDeviceService, 
+                              OSTypeService osTypeService,
                               TechnicalPersonService technicalPersonService,
                               OsTypeRepository osTypeRepository, DocumentService documentService,
                               PortService portService, ServiceIPRepository serviceIPRepository,
                               NSService nsService, NetmonServiceRepository netmonServiceRepository,
                               ServicePortRepository servicePortRepository, IPService ipService,
-                              BillingService billingService, TicketService ticketService,
+                            //   BillingService billingService, 
+                              TicketService ticketService,
                               CompanyRepository companyRepository, CompanyService companyService,
                               LogService logService, VpsPlanRepository vpsPlanRepository,
                               ServiceBillingRepository serviceBillingRepository,
@@ -72,7 +74,7 @@ public class CustomerController {
                               UserManagementService userManagementService,
                               UserRepository userRepository) {
         this.technicalPersonRepository = technicalPersonRepository;
-        this.colocationDeviceService = colocationDeviceService;
+        // this.colocationDeviceService = colocationDeviceService;
         this.technicalPersonService = technicalPersonService;
         this.osTypeRepository = osTypeRepository;
         this.documentService = documentService;
@@ -82,7 +84,7 @@ public class CustomerController {
         this.netmonServiceRepository = netmonServiceRepository;
         this.servicePortRepository = servicePortRepository;
         this.ipService = ipService;
-        this.billingService = billingService;
+        // this.billingService = billingService;
         this.ticketService = ticketService;
         this.companyRepository = companyRepository;
         this.companyService = companyService;
@@ -343,224 +345,225 @@ public class CustomerController {
 
     }
 
-    /**
-     * create a new colocation
-     * @param colocationRequest the document information object
-     * @param currentUser the user id who currently logged in
-     * @return OK response or report error
-     */
-    @PostMapping("/colocations/new")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> createColocation(@Valid @RequestBody ColocationRequest colocationRequest,
-                                               @CurrentUser UserPrincipal currentUser) {
+//     /**
+//      * create a new colocation
+//      * @param colocationRequest the document information object
+//      * @param currentUser the user id who currently logged in
+//      * @return OK response or report error
+//      */
+//     @PostMapping("/colocations/new")
+//     @PreAuthorize("hasRole('CUSTOMER')")
+//     public ResponseEntity<?> createColocation(@Valid @RequestBody ColocationRequest colocationRequest,
+//                                                @CurrentUser UserPrincipal currentUser) {
 
-        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-        if(!companyOptional.isPresent()){
-            logService.createLog("CREATE_COLOCATION", currentUser.getUsername(),
-                    NetmonStatus.LOG_STATUS.FAILED,
-                    "", colocationRequest.toString(), "The customer has no company.");
-            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-        }
+//         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+//         if(!companyOptional.isPresent()){
+//             logService.createLog("CREATE_COLOCATION", currentUser.getUsername(),
+//                     NetmonStatus.LOG_STATUS.FAILED,
+//                     "", colocationRequest.toString(), "The customer has no company.");
+//             throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+//         }
 
-        Optional<TechnicalPerson> technicalPersonOptional = technicalPersonRepository.findByIdAndUserId(
-                colocationRequest.getTechnicalPersonId(), currentUser.getId());
-        if (!technicalPersonOptional.isPresent()) {
-            logService.createLog("CREATE_COLOCATION", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "", colocationRequest.toString(),
-                    "The technical person does not exists.");
-            throw new BadRequestException("The technical person does not exists.");
-        }
+//         Optional<TechnicalPerson> technicalPersonOptional = technicalPersonRepository.findByIdAndUserId(
+//                 colocationRequest.getTechnicalPersonId(), currentUser.getId());
+//         if (!technicalPersonOptional.isPresent()) {
+//             logService.createLog("CREATE_COLOCATION", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "", colocationRequest.toString(),
+//                     "The technical person does not exists.");
+//             throw new BadRequestException("The technical person does not exists.");
+//         }
 
-        Optional<OSType> osTypeOptional = osTypeRepository.findById(colocationRequest.getOsTypeId());
-        if (!osTypeOptional.isPresent()) {
-            logService.createLog("CREATE_COLOCATION", currentUser.getUsername(),
-                    NetmonStatus.LOG_STATUS.FAILED, "", colocationRequest.toString(),
-                    "The os type does not exists.");
-            throw new BadRequestException("The os type does not exists.");
-        }
+//         Optional<OSType> osTypeOptional = osTypeRepository.findById(colocationRequest.getOsTypeId());
+//         if (!osTypeOptional.isPresent()) {
+//             logService.createLog("CREATE_COLOCATION", currentUser.getUsername(),
+//                     NetmonStatus.LOG_STATUS.FAILED, "", colocationRequest.toString(),
+//                     "The os type does not exists.");
+//             throw new BadRequestException("The os type does not exists.");
+//         }
 
-        NetmonService netmonService = nsService.createColocation(currentUser, colocationRequest,
-                companyOptional.get(), technicalPersonOptional.get(), osTypeOptional.get());
+//         NetmonService netmonService = nsService.createColocation(currentUser, colocationRequest,
+//                 companyOptional.get(), technicalPersonOptional.get(), osTypeOptional.get());
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{colocationId}")
-                .buildAndExpand(netmonService.getId()).toUri();
+//         URI location = ServletUriComponentsBuilder
+//                 .fromCurrentRequest().path("/{colocationId}")
+//                 .buildAndExpand(netmonService.getId()).toUri();
 
-        return ResponseEntity.created(location)
-                .body(new ApiResponse(true, "The colocation created successfully."));
-    }
+//         return ResponseEntity.created(location)
+//                 .body(new ApiResponse(true, "The colocation created successfully."));
+//     }
 
-    /**
-     * getting list of all user colocations
-     * @param currentUser the user id who currently logged in
-     * @param page the page number of the response (default value is 0)
-     * @param size the page size of each response (default value is 30)
-     * @return colocation responses page by page
-     */
-    @GetMapping("/colocations/all")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public PagedResponse<ColocationResponse> getCompanyColocations(@CurrentUser UserPrincipal currentUser,
-                                                                     @RequestParam(value = "page",
-                                                                             defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-                                                                     @RequestParam(value = "size",
-                                                                             defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
-        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-        if(!companyOptional.isPresent()){
-            logService.createLog("GET_ALL_COLOCATIONS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "", "", "The customer has no company.");
-            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-        }
-        Long companyId = companyOptional.get().getId();
+//     /**
+//      * getting list of all user colocations
+//      * @param currentUser the user id who currently logged in
+//      * @param page the page number of the response (default value is 0)
+//      * @param size the page size of each response (default value is 30)
+//      * @return colocation responses page by page
+//      */
+//     @GetMapping("/colocations/all")
+//     @PreAuthorize("hasRole('CUSTOMER')")
+//     public PagedResponse<ColocationResponse> getCompanyColocations(@CurrentUser UserPrincipal currentUser,
+//                                                                      @RequestParam(value = "page",
+//                                                                              defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+//                                                                      @RequestParam(value = "size",
+//                                                                              defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+//         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+//         if(!companyOptional.isPresent()){
+//             logService.createLog("GET_ALL_COLOCATIONS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "", "", "The customer has no company.");
+//             throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+//         }
+//         Long companyId = companyOptional.get().getId();
 
-        return nsService.getCompanyColocations(currentUser, companyId, page, size);
-    }
+//         return nsService.getCompanyColocations(currentUser, companyId, page, size);
+//     }
 
-    /**
-     * getting a colocation info by id
-     * @param currentUser the user id who currently logged in
-     * @param colocationId the unique colocation number
-     * @return colocation response
-     */
-    @GetMapping("/colocations/{colocationId}")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ColocationResponse getColocationById(@CurrentUser UserPrincipal currentUser,
-                                                  @PathVariable ServiceIdentity colocationId) {
+//     /**
+//      * getting a colocation info by id
+//      * @param currentUser the user id who currently logged in
+//      * @param colocationId the unique colocation number
+//      * @return colocation response
+//      */
+//     @GetMapping("/colocations/{colocationId}")
+//     @PreAuthorize("hasRole('CUSTOMER')")
+//     public ColocationResponse getColocationById(@CurrentUser UserPrincipal currentUser,
+//                                                   @PathVariable Long colocationId) {
 
-        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-        if(!companyOptional.isPresent()){
-            logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[colocationId=" + colocationId + "]", "", "The customer has no company.");
-            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-        }
-        Long companyId = companyOptional.get().getId();
+//         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+//         if(!companyOptional.isPresent()){
+//             logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[colocationId=" + colocationId + "]", "", "The customer has no company.");
+//             throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+//         }
+//         Long companyId = companyOptional.get().getId();
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(colocationId, companyId,
-                NetmonTypes.SERVICE_TYPES.COLOCATION)) {
-            logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[colocationId=" + colocationId + "]", "",
-                    "This service does not belong to the company.");
-            throw new AccessDeniedException("This service does not belong to the company.");
-        }
+//         if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(colocationId, companyId,
+//                 NetmonTypes.SERVICE_TYPES.COLOCATION)) {
+//             logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[colocationId=" + colocationId + "]", "",
+//                     "This service does not belong to the company.");
+//             throw new AccessDeniedException("This service does not belong to the company.");
+//         }
 
-        return nsService.getColocationById(colocationId, currentUser);
-    }
+//         return nsService.getColocationById(colocationId, currentUser);
+//     }
 
-    /**
-     * create a new device
-     * @param colocationDeviceRequest the device information object
-     * @param currentUser the user id who currently logged in
-     * @param colocationId the unique colocation number
-     * @return OK response or report error
-     */
-    @PostMapping("/colocations/{colocationId}/devices/new")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> createColocationDevice(@Valid @RequestBody DeviceRequest colocationDeviceRequest,
-                                                     @CurrentUser UserPrincipal currentUser,
-                                                     @PathVariable ServiceIdentity colocationId) {
+//     /**
+//      * create a new device
+//      * @param colocationDeviceRequest the device information object
+//      * @param currentUser the user id who currently logged in
+//      * @param colocationId the unique colocation number
+//      * @return OK response or report error
+//      */
+//     @PostMapping("/colocations/{colocationId}/devices/new")
+//     @PreAuthorize("hasRole('CUSTOMER')")
+//     public ResponseEntity<?> createColocationDevice(@Valid @RequestBody DeviceRequest colocationDeviceRequest,
+//                                                      @CurrentUser UserPrincipal currentUser,
+//                                                      @PathVariable Long colocationId) {
 
-        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-        if(!companyOptional.isPresent()){
-            logService.createLog("CREATE_COLOCATION_DEVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[colocationId=" + colocationId + "]", colocationDeviceRequest.toString(),
-                    "The customer has no company.");
-            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-        }
-        Long companyId = companyOptional.get().getId();
+//         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+//         if(!companyOptional.isPresent()){
+//             logService.createLog("CREATE_COLOCATION_DEVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[colocationId=" + colocationId + "]", colocationDeviceRequest.toString(),
+//                     "The customer has no company.");
+//             throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+//         }
+//         Long companyId = companyOptional.get().getId();
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(colocationId, companyId,
-                NetmonTypes.SERVICE_TYPES.COLOCATION)) {
-            logService.createLog("CREATE_COLOCATION_DEVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[colocationId=" + colocationId + "]", colocationDeviceRequest.toString(),
-                    "This service does not belong to the company.");
-            throw new AccessDeniedException("This service does not belong to the company.");
-        }
+//         if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(colocationId, companyId,
+//                 NetmonTypes.SERVICE_TYPES.COLOCATION)) {
+//             logService.createLog("CREATE_COLOCATION_DEVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[colocationId=" + colocationId + "]", colocationDeviceRequest.toString(),
+//                     "This service does not belong to the company.");
+//             throw new AccessDeniedException("This service does not belong to the company.");
+//         }
 
-        Device colocationDevice = colocationDeviceService.create(colocationDeviceRequest, currentUser,
-                colocationId);
+//         Device colocationDevice = colocationDeviceService.create(colocationDeviceRequest, currentUser, colocationId);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{deviceId}")
-                .buildAndExpand(colocationDevice.getId()).toUri();
+//         URI location = ServletUriComponentsBuilder
+//                 .fromCurrentRequest().path("/{deviceId}")
+//                 .buildAndExpand(colocationDevice.getId()).toUri();
 
-        return ResponseEntity.created(location)
-                .body(new ApiResponse(true, "The device created successfully."));
-    }
+//         return ResponseEntity.created(location)
+//                 .body(new ApiResponse(true, "The device created successfully."));
+//     }
 
-    /**
-     * getting all devices bu colocation id
-     * @param currentUser the user id who currently logged in
-     * @param colocationId the unique colocation number
-     * @param page the page number of the response (default value is 0)
-     * @param size the page size of each response (default value is 30)
-     * @return device responses page by page
-     */
-    @GetMapping("/colocations/{colocationId}/devices/all")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public PagedResponse<ColocationDeviceResponse> getColocationDevices(@CurrentUser UserPrincipal currentUser,
-                                                                          @PathVariable ServiceIdentity colocationId,
-                                                                          @RequestParam(value = "page",
-                                                                                  defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-                                                                          @RequestParam(value = "size",
-                                                                                  defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+//     /**
+//      * getting all devices bu colocation id
+//      * @param currentUser the user id who currently logged in
+//      * @param colocationId the unique colocation number
+//      * @param createDate the service create date
+//      * @param page the page number of the response (default value is 0)
+//      * @param size the page size of each response (default value is 30)
+//      * @return device responses page by page
+//      */
+//     @GetMapping("/colocations/{colocationId}/devices/all")
+//     @PreAuthorize("hasRole('CUSTOMER')")
+//     public PagedResponse<ColocationDeviceResponse> getColocationDevices(@CurrentUser UserPrincipal currentUser,
+//                                                                           @PathVariable Long colocationId,
+//                                                                           @RequestParam(value = "page",
+//                                                                                   defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+//                                                                           @RequestParam(value = "size",
+//                                                                                   defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
 
-        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-        if(!companyOptional.isPresent()){
-            logService.createLog("GET_ALL_COLOCATION_DEVICES", currentUser.getUsername(),
-                    NetmonStatus.LOG_STATUS.FAILED,
-                    "[colocationId=" + colocationId + "]", "", "The customer has no company.");
-            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-        }
-        Long companyId = companyOptional.get().getId();
+//         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+//         if(!companyOptional.isPresent()){
+//             logService.createLog("GET_ALL_COLOCATION_DEVICES", currentUser.getUsername(),
+//                     NetmonStatus.LOG_STATUS.FAILED,
+//                     "[colocationId=" + colocationId + "]", "", "The customer has no company.");
+//             throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+//         }
+//         Long companyId = companyOptional.get().getId();
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(colocationId, companyId,
-                NetmonTypes.SERVICE_TYPES.COLOCATION)) {
-            logService.createLog("GET_ALL_COLOCATION_DEVICES", currentUser.getUsername(),
-                    NetmonStatus.LOG_STATUS.FAILED,
-                    "[colocationId=" + colocationId + "]", "", "This service does not belong to the company.");
-            throw new AccessDeniedException("This service does not belong to the company.");
-        }
+//         if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(colocationId, companyId,
+//                 NetmonTypes.SERVICE_TYPES.COLOCATION)) {
+//             logService.createLog("GET_ALL_COLOCATION_DEVICES", currentUser.getUsername(),
+//                     NetmonStatus.LOG_STATUS.FAILED,
+//                     "[colocationId=" + colocationId + "]", "", "This service does not belong to the company.");
+//             throw new AccessDeniedException("This service does not belong to the company.");
+//         }
 
-        return colocationDeviceService.getColocationDevices(currentUser, colocationId, page, size);
-    }
+//         return colocationDeviceService.getColocationDevices(currentUser, colocationId, page, size);
+//     }
 
-    /**
-     * getting device info by id
-     * @param currentUser the user id who currently logged in
-     * @param colocationId the unique colocation number
-     * @param deviceId the unique device number
-     * @return device response
-     */
-    @GetMapping("/colocations/{colocationId}/devices/{deviceId}")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ColocationDeviceResponse getColocationDeviceById(@CurrentUser UserPrincipal currentUser,
-                                                              @PathVariable ServiceIdentity colocationId,
-                                                              @PathVariable Long deviceId) {
+//     /**
+//      * getting device info by id
+//      * @param currentUser the user id who currently logged in
+//      * @param colocationId the unique colocation number
+//      * @param deviceId the unique device number
+//      * @return device response
+//      */
+//     @GetMapping("/colocations/{colocationId}/devices/{deviceId}")
+//     @PreAuthorize("hasRole('CUSTOMER')")
+//     public ColocationDeviceResponse getColocationDeviceById(@CurrentUser UserPrincipal currentUser,
+//                                                               @PathVariable Long colocationId,
+//                                                               @PathVariable Long deviceId) {
 
-        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-        if(!companyOptional.isPresent()){
-            logService.createLog("GET_COLOCATION_DEVICE_INFO", currentUser.getUsername(),
-                    NetmonStatus.LOG_STATUS.FAILED, "[colocationId=" + colocationId +
-                            ",deviceId=" + deviceId + "]", "", "The customer has no company.");
-            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-        }
-        Long companyId = companyOptional.get().getId();
+//         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+//         if(!companyOptional.isPresent()){
+//             logService.createLog("GET_COLOCATION_DEVICE_INFO", currentUser.getUsername(),
+//                     NetmonStatus.LOG_STATUS.FAILED, "[colocationId=" + colocationId +
+//                             ",deviceId=" + deviceId + "]", "", "The customer has no company.");
+//             throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+//         }
+//         Long companyId = companyOptional.get().getId();
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(colocationId, companyId,
-                NetmonTypes.SERVICE_TYPES.COLOCATION)) {
-            logService.createLog("GET_COLOCATION_DEVICE_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[colocationId=" + colocationId + ",deviceId=" + deviceId + "]", "",
-                    "This service does not belong to the company.");
-            throw new AccessDeniedException("This service does not belong to the company.");
-        }
+//         if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(colocationId, companyId,
+//                 NetmonTypes.SERVICE_TYPES.COLOCATION)) {
+//             logService.createLog("GET_COLOCATION_DEVICE_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[colocationId=" + colocationId + ",deviceId=" + deviceId + "]", "",
+//                     "This service does not belong to the company.");
+//             throw new AccessDeniedException("This service does not belong to the company.");
+//         }
 
-        return colocationDeviceService.getColocationDeviceById(deviceId, currentUser);
-    }
+//         return colocationDeviceService.getColocationDeviceById(deviceId, currentUser);
+//     }
 
     /**
      * getting list of ips by service id
      * @param currentUser the user id who currently logged in
      * @param serviceType vps / collocation
      * @param serviceId the unique service number
+     * @param createDate the service create date
      * @param page the page number of the response (default value is 0)
      * @param size the page size of each response (default value is 30)
      * @return ip responses page by page
@@ -569,7 +572,8 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public PagedResponse<ServiceIPResponse> getServiceIPs(@CurrentUser UserPrincipal currentUser,
                                                           @PathVariable String serviceType,
-                                                          @PathVariable ServiceIdentity serviceId,
+                                                          @PathVariable Long serviceId,
+                                                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createDate,
                                                           @RequestParam(value = "page",
                                                                   defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                           @RequestParam(value = "size",
@@ -609,7 +613,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ServiceIPResponse getServiceIPById(@CurrentUser UserPrincipal currentUser,
                                               @PathVariable String serviceType,
-                                              @PathVariable ServiceIdentity serviceId,
+                                              @PathVariable Long serviceId,
                                               @PathVariable Long ipId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
@@ -635,197 +639,201 @@ public class CustomerController {
         return ipService.getServiceIpById(ipId, currentUser);
     }
 
-    /**
-     * creating a billing
-     * @param currentUser the user id who currently logged in
-     * @param startDate the start date to calculate a billing
-     * @param endDate the end date to calculate a billing
-     * @param description an explanation of the action
-     * @param serviceType vps / collocation
-     * @param serviceId the unique service number
-     * @return OK response or report error
-     */
-    @GetMapping("/{serviceType}/{serviceId}/billings/calculate")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> calculateBilling(@CurrentUser UserPrincipal currentUser,
-                                              @RequestParam("startDate")
-                                              @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-                                              @RequestParam("endDate")
-                                              @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-                                              @RequestParam("description") String description,
-                                              @PathVariable String serviceType,
-                                              @PathVariable ServiceIdentity serviceId) {
+    // /**
+    //  * creating a billing
+    //  * @param currentUser the user id who currently logged in
+    //  * @param startDate the start date to calculate a billing
+    //  * @param endDate the end date to calculate a billing
+    //  * @param description an explanation of the action
+    //  * @param serviceType vps / collocation
+    //  * @param serviceId the unique service number
+    //  * @return OK response or report error
+    //  */
+    // @GetMapping("/{serviceType}/{serviceId}/billings/calculate")
+    // @PreAuthorize("hasRole('CUSTOMER')")
+    // public ResponseEntity<?> calculateBilling(@CurrentUser UserPrincipal currentUser,
+    //                                           @RequestParam("startDate")
+    //                                           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+    //                                           @RequestParam("endDate")
+    //                                           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+    //                                           @RequestParam("description") String description,
+    //                                           @PathVariable String serviceType,
+    //                                           @PathVariable Long serviceId) {
 
-        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-        if(!companyOptional.isPresent()){
-            logService.createLog("CALCULATE_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + ",startDate=" + startDate + ",endDate=" + endDate +"]", "",
-                    "The customer has no company.");
-            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-        }
-        Long companyId = companyOptional.get().getId();
+    //     Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+    //     if(!companyOptional.isPresent()){
+    //         logService.createLog("CALCULATE_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+    //                 "[serviceId=" + serviceId + ",startDate=" + startDate + ",endDate=" + endDate +"]", "",
+    //                 "The customer has no company.");
+    //         throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+    //     }
+    //     Long companyId = companyOptional.get().getId();
 
-        NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
-        if(serviceType.compareToIgnoreCase("vps") == 0)
-            srvType = NetmonTypes.SERVICE_TYPES.VPS;
+    //     NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
+    //     if(serviceType.compareToIgnoreCase("vps") == 0)
+    //         srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
-            logService.createLog("CALCULATE_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + ",startDate=" + startDate + ",endDate=" + endDate +"]", "",
-                    "This service does not belong to the company.");
-            throw new AccessDeniedException("This service does not belong to the company.");
-        }
+    //     if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+    //         logService.createLog("CALCULATE_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+    //                 "[serviceId=" + serviceId + ",startDate=" + startDate + ",endDate=" + endDate +"]", "",
+    //                 "This service does not belong to the company.");
+    //         throw new AccessDeniedException("This service does not belong to the company.");
+    //     }
 
-        // checking start and end date
-        if (startDate.isAfter(endDate)) {
-            logService.createLog("CALCULATE_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + ",startDate=" + startDate + ",endDate=" + endDate +"]", "",
-                    "The endDate should be greater then the startDate.");
-            throw new BadRequestException("The endDate should be greater then the startDate.");
-        }
+    //     // checking start and end date
+    //     if (startDate.isAfter(endDate)) {
+    //         logService.createLog("CALCULATE_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+    //                 "[serviceId=" + serviceId + ",startDate=" + startDate + ",endDate=" + endDate +"]", "",
+    //                 "The endDate should be greater then the startDate.");
+    //         throw new BadRequestException("The endDate should be greater then the startDate.");
+    //     }
 
-        Billing billing = billingService.calculateBilling(currentUser, serviceId, startDate, endDate,
-                description);
+    //     Billing billing = billingService.calculateBilling(currentUser, serviceId, startDate, endDate,
+    //             description);
 
-        serviceBillingRepository.save(billing);
+    //     serviceBillingRepository.save(billing);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{billingId}")
-                .buildAndExpand(billing.getId()).toUri();
+    //     URI location = ServletUriComponentsBuilder
+    //             .fromCurrentRequest().path("/{billingId}")
+    //             .buildAndExpand(billing.getId()).toUri();
 
-        return ResponseEntity.created(location)
-                .body(new ApiResponse(true, "The billing created successfully."));
-    }
+    //     return ResponseEntity.created(location)
+    //             .body(new ApiResponse(true, "The billing created successfully."));
+    // }
 
-    /**
-     * updating order id for a billing
-     * @param callAPIBillingRequest the api information object to pay
-     * @param currentUser the user id who currently logged in
-     * @param serviceType vps / collocation
-     * @param serviceId the unique service number
-     * @param billingId the unique billing number
-     * @return OK response or report error
-     */
-    @PutMapping("/{serviceType}/{serviceId}/billings/{billingId}/updateOrderId")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> updateBillingOrderId(@Valid @RequestBody CallAPIBillingRequest callAPIBillingRequest,
-                                                      @CurrentUser UserPrincipal currentUser,
-                                                      @PathVariable String serviceType,
-                                                      @PathVariable ServiceIdentity serviceId,
-                                                      @PathVariable Long billingId) {
+    // /**
+    //  * updating order id for a billing
+    //  * @param callAPIBillingRequest the api information object to pay
+    //  * @param currentUser the user id who currently logged in
+    //  * @param serviceType vps / collocation
+    //  * @param serviceId the unique service number
+    //  * @param createDate the service create date
+    //  * @param billingId the unique billing number
+    //  * @return OK response or report error
+    //  */
+    // @PutMapping("/{serviceType}/{serviceId}/billings/{billingId}/updateOrderId")
+    // @PreAuthorize("hasRole('CUSTOMER')")
+    // public ResponseEntity<?> updateBillingOrderId(@Valid @RequestBody CallAPIBillingRequest callAPIBillingRequest,
+    //                                                   @CurrentUser UserPrincipal currentUser,
+    //                                                   @PathVariable String serviceType,
+    //                                                   @PathVariable Long serviceId,
+    //                                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createDate,
+    //                                                   @PathVariable Long billingId) {
 
-        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-        if(!companyOptional.isPresent()){
-            logService.createLog("UPDATE_BILLING_ORDERID", currentUser.getUsername(),
-                    NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + ",billingId=" + billingId + "]",
-                    callAPIBillingRequest.toString(), "The customer has no company.");
-            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-        }
-        Long companyId = companyOptional.get().getId();
+    //     Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+    //     if(!companyOptional.isPresent()){
+    //         logService.createLog("UPDATE_BILLING_ORDERID", currentUser.getUsername(),
+    //                 NetmonStatus.LOG_STATUS.FAILED,
+    //                 "[serviceId=" + serviceId + ",billingId=" + billingId + "]",
+    //                 callAPIBillingRequest.toString(), "The customer has no company.");
+    //         throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+    //     }
+    //     Long companyId = companyOptional.get().getId();
 
-        NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
-        if(serviceType.compareToIgnoreCase("vps") == 0)
-            srvType = NetmonTypes.SERVICE_TYPES.VPS;
+    //     NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
+    //     if(serviceType.compareToIgnoreCase("vps") == 0)
+    //         srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
-            logService.createLog("UPDATE_BILLING_ORDERID", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + ",billingId=" + billingId + "]",
-                    callAPIBillingRequest.toString(), "This service does not belong to the company.");
-            throw new AccessDeniedException("This service does not belong to the company.");
-        }
+    //     if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+    //         logService.createLog("UPDATE_BILLING_ORDERID", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+    //                 "[serviceId=" + serviceId + ",billingId=" + billingId + "]",
+    //                 callAPIBillingRequest.toString(), "This service does not belong to the company.");
+    //         throw new AccessDeniedException("This service does not belong to the company.");
+    //     }
 
-        billingService.updateOrderId(currentUser, billingId, callAPIBillingRequest);
+    //     billingService.updateOrderId(currentUser, billingId, callAPIBillingRequest);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{billingId}")
-                .buildAndExpand(billingId).toUri();
+    //     URI location = ServletUriComponentsBuilder
+    //             .fromCurrentRequest().path("/{billingId}")
+    //             .buildAndExpand(billingId).toUri();
 
-        return ResponseEntity.created(location)
-                .body(new ApiResponse(true, "The billing updated successfully."));
-    }
+    //     return ResponseEntity.created(location)
+    //             .body(new ApiResponse(true, "The billing updated successfully."));
+    // }
 
-    /**
-     * updating reference id for a billing
-     * @param callAPIBillingRequest the api information object to pay
-     * @param currentUser the user id who currently logged in
-     * @param serviceType vps / collocation
-     * @param serviceId the unique service number
-     * @param billingId the unique billing number
-     * @return OK response or report error
-     */
-    @PutMapping("/{serviceType}/{serviceId}/billings/{billingId}/updateReferenceId")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> updateBillingReferenceId(@Valid @RequestBody CallAPIBillingRequest callAPIBillingRequest,
-                                                      @CurrentUser UserPrincipal currentUser,
-                                                      @PathVariable String serviceType,
-                                                      @PathVariable ServiceIdentity serviceId,
-                                                      @PathVariable Long billingId) {
+    // /**
+    //  * updating reference id for a billing
+    //  * @param callAPIBillingRequest the api information object to pay
+    //  * @param currentUser the user id who currently logged in
+    //  * @param serviceType vps / collocation
+    //  * @param serviceId the unique service number
+    //  * @param createDate the service create date
+    //  * @param billingId the unique billing number
+    //  * @return OK response or report error
+    //  */
+    // @PutMapping("/{serviceType}/{serviceId}/billings/{billingId}/updateReferenceId")
+    // @PreAuthorize("hasRole('CUSTOMER')")
+    // public ResponseEntity<?> updateBillingReferenceId(@Valid @RequestBody CallAPIBillingRequest callAPIBillingRequest,
+    //                                                   @CurrentUser UserPrincipal currentUser,
+    //                                                   @PathVariable String serviceType,
+    //                                                   @PathVariable Long serviceId,
+    //                                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createDate,
+    //                                                   @PathVariable Long billingId) {
 
-        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-        if(!companyOptional.isPresent()){
-            logService.createLog("UPDATE_BILLING_REFERENCEID", currentUser.getUsername(),
-                    NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + ",billingId=" + billingId + "]",
-                    callAPIBillingRequest.toString(), "The customer has no company.");
-            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-        }
-        Long companyId = companyOptional.get().getId();
+    //     Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+    //     if(!companyOptional.isPresent()){
+    //         logService.createLog("UPDATE_BILLING_REFERENCEID", currentUser.getUsername(),
+    //                 NetmonStatus.LOG_STATUS.FAILED,
+    //                 "[serviceId=" + serviceId + ",billingId=" + billingId + "]",
+    //                 callAPIBillingRequest.toString(), "The customer has no company.");
+    //         throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+    //     }
+    //     Long companyId = companyOptional.get().getId();
 
-        NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
-        if(serviceType.compareToIgnoreCase("vps") == 0)
-            srvType = NetmonTypes.SERVICE_TYPES.VPS;
+    //     NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
+    //     if(serviceType.compareToIgnoreCase("vps") == 0)
+    //         srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
-            logService.createLog("UPDATE_BILLING_REFERENCEID", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + ",billingId=" + billingId + "]",
-                    callAPIBillingRequest.toString(), "This service does not belong to the company.");
-            throw new AccessDeniedException("This service does not belong to the company.");
-        }
+    //     if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+    //         logService.createLog("UPDATE_BILLING_REFERENCEID", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+    //                 "[serviceId=" + serviceId + ",billingId=" + billingId + "]",
+    //                 callAPIBillingRequest.toString(), "This service does not belong to the company.");
+    //         throw new AccessDeniedException("This service does not belong to the company.");
+    //     }
 
-        billingService.updateReferenceId(currentUser, billingId, callAPIBillingRequest);
+    //     billingService.updateReferenceId(currentUser, billingId, callAPIBillingRequest);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{billingId}")
-                .buildAndExpand(billingId).toUri();
+    //     URI location = ServletUriComponentsBuilder
+    //             .fromCurrentRequest().path("/{billingId}")
+    //             .buildAndExpand(billingId).toUri();
 
-        return ResponseEntity.created(location)
-                .body(new ApiResponse(true, "The billing updated successfully."));
-    }
+    //     return ResponseEntity.created(location)
+    //             .body(new ApiResponse(true, "The billing updated successfully."));
+    // }
 
-    /**
-     * getting last paid billing info
-     * @param currentUser the user id who currently logged in
-     * @param serviceType vps / collocation
-     * @param serviceId the unique service number
-     * @return billing response
-     */
-    @GetMapping("/{serviceType}/{serviceId}/billings/lastPaid")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public Billing getLastPaidBilling(@CurrentUser UserPrincipal currentUser,
-                                                @PathVariable String serviceType,
-                                                @PathVariable ServiceIdentity serviceId) {
+    // /**
+    //  * getting last paid billing info
+    //  * @param currentUser the user id who currently logged in
+    //  * @param serviceType vps / collocation
+    //  * @param serviceId the unique service number
+    //  * @return billing response
+    //  */
+    // @GetMapping("/{serviceType}/{serviceId}/billings/lastPaid")
+    // @PreAuthorize("hasRole('CUSTOMER')")
+    // public Billing getLastPaidBilling(@CurrentUser UserPrincipal currentUser,
+    //                                             @PathVariable String serviceType,
+    //                                             @PathVariable Long serviceId) {
 
-        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-        if(!companyOptional.isPresent()){
-            logService.createLog("GET_LAST_PAID_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + "]", "", "The customer has no company.");
-            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-        }
-        Long companyId = companyOptional.get().getId();
+    //     Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+    //     if(!companyOptional.isPresent()){
+    //         logService.createLog("GET_LAST_PAID_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+    //                 "[serviceId=" + serviceId + "]", "", "The customer has no company.");
+    //         throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+    //     }
+    //     Long companyId = companyOptional.get().getId();
 
-        NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
-        if(serviceType.compareToIgnoreCase("vps") == 0)
-            srvType = NetmonTypes.SERVICE_TYPES.VPS;
+    //     NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
+    //     if(serviceType.compareToIgnoreCase("vps") == 0)
+    //         srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
-            logService.createLog("GET_LAST_PAID_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + "]", "", "This service does not belong to the company.");
-            throw new AccessDeniedException("This service does not belong to the company.");
-        }
+    //     if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+    //         logService.createLog("GET_LAST_PAID_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+    //                 "[serviceId=" + serviceId + "]", "", "This service does not belong to the company.");
+    //         throw new AccessDeniedException("This service does not belong to the company.");
+    //     }
 
-        return billingService.getLastPaidBilling(serviceId);
-    }
+    //     return billingService.getLastPaidBilling(serviceId);
+    // }
 
     /**
      * getting value of ip usage
@@ -844,7 +852,7 @@ public class CustomerController {
                                              @RequestParam("endDate")
                                              @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                                              @PathVariable String serviceType,
-                                             @PathVariable ServiceIdentity serviceId,
+                                             @PathVariable Long serviceId,
                                              @PathVariable Long ipId,
                                              @CurrentUser UserPrincipal currentUser) {
 
@@ -904,57 +912,57 @@ public class CustomerController {
         return new IpUsageResponse(startDate, endDate, ip.getIp(), ipUpUsages, ipDownUsages);
     }
 
-    /**
-     * create a new port
-     * @param servicePortRequest the port information object
-     * @param currentUser the user id who currently logged in
-     * @param serviceType vps / collocation
-     * @param serviceId the unique service number
-     * @return OK response or report error
-     */
-    @PostMapping("/{serviceType}/{serviceId}/ports/new")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> createColocationPort(@Valid @RequestBody ServicePortRequest servicePortRequest,
-                                                   @CurrentUser UserPrincipal currentUser,
-                                                   @PathVariable String serviceType,
-                                                   @PathVariable ServiceIdentity serviceId) {
+//     /**
+//      * create a new port
+//      * @param servicePortRequest the port information object
+//      * @param currentUser the user id who currently logged in
+//      * @param serviceType vps / collocation
+//      * @param serviceId the unique service number
+//      * @return OK response or report error
+//      */
+//     @PostMapping("/{serviceType}/{serviceId}/ports/new")
+//     @PreAuthorize("hasRole('CUSTOMER')")
+//     public ResponseEntity<?> createColocationPort(@Valid @RequestBody ServicePortRequest servicePortRequest,
+//                                                    @CurrentUser UserPrincipal currentUser,
+//                                                    @PathVariable String serviceType,
+//                                                    @PathVariable Long serviceId) {
 
-        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-        if(!companyOptional.isPresent()){
-            logService.createLog("CREATE_COLOCATION_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + "]", servicePortRequest.toString(), "The customer has no company.");
-            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-        }
-        Long companyId = companyOptional.get().getId();
+//         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+//         if(!companyOptional.isPresent()){
+//             logService.createLog("CREATE_COLOCATION_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[serviceId=" + serviceId + "]", servicePortRequest.toString(), "The customer has no company.");
+//             throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+//         }
+//         Long companyId = companyOptional.get().getId();
 
-        NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
-        if(serviceType.compareToIgnoreCase("vps") == 0)
-            srvType = NetmonTypes.SERVICE_TYPES.VPS;
+//         NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
+//         if(serviceType.compareToIgnoreCase("vps") == 0)
+//             srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
-            logService.createLog("CREATE_COLOCATION_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + "]", servicePortRequest.toString(),
-                    "This service does not belong to the company.");
-            throw new AccessDeniedException("This service does not belong to the company.");
-        }
+//         if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+//             logService.createLog("CREATE_COLOCATION_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[serviceId=" + serviceId + "]", servicePortRequest.toString(),
+//                     "This service does not belong to the company.");
+//             throw new AccessDeniedException("This service does not belong to the company.");
+//         }
+//         LocalDate createDate = LocalDate.now();
+//         if (servicePortRepository.existsByPortAndNetmonServiceId(servicePortRequest.getPort(), serviceId, createDate)) {
+//             logService.createLog("CREATE_COLOCATION_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[serviceId=" + serviceId + "]", servicePortRequest.toString(), "This port is already assigned.");
 
-        if (servicePortRepository.existsByPortAndNetmonServiceId(servicePortRequest.getPort(), serviceId)) {
-            logService.createLog("CREATE_COLOCATION_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + "]", servicePortRequest.toString(), "This port is already assigned.");
+//             return new ResponseEntity<>(new ApiResponse(false, "This port is already assigned."),
+//                     HttpStatus.BAD_REQUEST);
+//         }
 
-            return new ResponseEntity<>(new ApiResponse(false, "This port is already assigned."),
-                    HttpStatus.BAD_REQUEST);
-        }
+//         Port servicePort = portService.create(servicePortRequest, currentUser, serviceId, createDate);
 
-        Port servicePort = portService.create(servicePortRequest, currentUser, serviceId);
+//         URI location = ServletUriComponentsBuilder
+//                 .fromCurrentRequest().path("/{portId}")
+//                 .buildAndExpand(servicePort.getId()).toUri();
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{portId}")
-                .buildAndExpand(servicePort.getId()).toUri();
-
-        return ResponseEntity.created(location)
-                .body(new ApiResponse(true, "The port created successfully."));
-    }
+//         return ResponseEntity.created(location)
+//                 .body(new ApiResponse(true, "The port created successfully."));
+//     }
 
     /**
      * getting list of ports by service id
@@ -969,7 +977,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public PagedResponse<ServicePortResponse> getColocationPorts(@CurrentUser UserPrincipal currentUser,
                                                                   @PathVariable String serviceType,
-                                                                  @PathVariable ServiceIdentity serviceId,
+                                                                  @PathVariable Long serviceId,
                                                                   @RequestParam(value = "page",
                                                                           defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                                   @RequestParam(value = "size",
@@ -996,41 +1004,41 @@ public class CustomerController {
         return portService.getServicePorts(currentUser, serviceId, page, size);
     }
 
-    /**
-     * getting port info by id
-     * @param currentUser the user id who currently logged in
-     * @param serviceType vps / collocation
-     * @param serviceId the unique service number
-     * @param portId the unique port number
-     * @return port response
-     */
-    @GetMapping("/{serviceType}/{serviceId}/ports/{portId}")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ServicePortResponse getColocationPortById(@CurrentUser UserPrincipal currentUser,
-                                                      @PathVariable String serviceType,
-                                                      @PathVariable ServiceIdentity serviceId,
-                                                      @PathVariable Long portId) {
-        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-        if(!companyOptional.isPresent()){
-            logService.createLog("GET_SERVICE_PORT_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + ",portId=" + portId + "]", "", "The customer has no company.");
-            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-        }
-        Long companyId = companyOptional.get().getId();
+//     /**
+//      * getting port info by id
+//      * @param currentUser the user id who currently logged in
+//      * @param serviceType vps / collocation
+//      * @param serviceId the unique service number
+//      * @param portId the unique port number
+//      * @return port response
+//      */
+//     @GetMapping("/{serviceType}/{serviceId}/ports/{portId}")
+//     @PreAuthorize("hasRole('CUSTOMER')")
+//     public ServicePortResponse getColocationPortById(@CurrentUser UserPrincipal currentUser,
+//                                                       @PathVariable String serviceType,
+//                                                       @PathVariable Long serviceId,
+//                                                       @PathVariable Long portId) {
+//         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+//         if(!companyOptional.isPresent()){
+//             logService.createLog("GET_SERVICE_PORT_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[serviceId=" + serviceId + ",portId=" + portId + "]", "", "The customer has no company.");
+//             throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+//         }
+//         Long companyId = companyOptional.get().getId();
 
-        NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
-        if(serviceType.compareToIgnoreCase("vps") == 0)
-            srvType = NetmonTypes.SERVICE_TYPES.VPS;
+//         NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
+//         if(serviceType.compareToIgnoreCase("vps") == 0)
+//             srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
-            logService.createLog("GET_SERVICE_PORT_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + ",portId=" + portId + "]", "",
-                    "This service does not belong to the company.");
-            throw new AccessDeniedException("This service does not belong to the company.");
-        }
+//         if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+//             logService.createLog("GET_SERVICE_PORT_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[serviceId=" + serviceId + ",portId=" + portId + "]", "",
+//                     "This service does not belong to the company.");
+//             throw new AccessDeniedException("This service does not belong to the company.");
+//         }
 
-        return portService.getServicePortById(portId, currentUser);
-    }
+//         return portService.getServicePortById(portId, currentUser);
+//     }
 
     /**
      * create a new ticket
@@ -1045,7 +1053,7 @@ public class CustomerController {
     public ResponseEntity<?> createServiceTicket(@Valid @RequestBody ServiceTicketRequest serviceTicketRequest,
                                                  @CurrentUser UserPrincipal currentUser,
                                                  @PathVariable String serviceType,
-                                                 @PathVariable ServiceIdentity serviceId) {
+                                                 @PathVariable Long serviceId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
         if(!companyOptional.isPresent()){
@@ -1066,7 +1074,8 @@ public class CustomerController {
             throw new AccessDeniedException("This service does not belong to the company.");
         }
 
-        Ticket serviceTicket = ticketService.create(serviceTicketRequest, currentUser, serviceId);
+        LocalDate createDate = LocalDate.now();                                
+        Ticket serviceTicket = ticketService.create(serviceTicketRequest, currentUser, serviceId, createDate);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{ticketId}")
@@ -1089,7 +1098,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public PagedResponse<ServiceTicketResponse> getServiceTickets(@CurrentUser UserPrincipal currentUser,
                                                                   @PathVariable String serviceType,
-                                                                  @PathVariable ServiceIdentity serviceId,
+                                                                  @PathVariable Long serviceId,
                                                                   @RequestParam(value = "page",
                                                                           defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                                   @RequestParam(value = "size",
@@ -1128,7 +1137,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ServiceTicketResponse getServiceTicketById(@CurrentUser UserPrincipal currentUser,
                                                       @PathVariable String serviceType,
-                                                      @PathVariable ServiceIdentity serviceId,
+                                                      @PathVariable Long serviceId,
                                                       @PathVariable Long ticketId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
@@ -1153,82 +1162,86 @@ public class CustomerController {
         return ticketService.getServiceTicketById(ticketId, currentUser);
     }
 
-    /**
-     * getting billing info by id
-     * @param currentUser the user id who currently logged in
-     * @param serviceType vps / collocation
-     * @param serviceId the unique service number
-     * @param billingId the unique billing number
-     * @return billing response
-     */
-    @GetMapping("/{serviceType}/{serviceId}/billings/{billingId}")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ServiceBillingResponse getServiceBillingById(@CurrentUser UserPrincipal currentUser,
-                                                        @PathVariable String serviceType,
-                                                        @PathVariable ServiceIdentity serviceId,
-                                                        @PathVariable Long billingId) {
+    // /**
+    //  * getting billing info by id
+    //  * @param currentUser the user id who currently logged in
+    //  * @param serviceType vps / collocation
+    //  * @param serviceId the unique service number
+    //  * @param createDate the service create date
+    //  * @param billingId the unique billing number
+    //  * @return billing response
+    //  */
+    // @GetMapping("/{serviceType}/{serviceId}/billings/{billingId}")
+    // @PreAuthorize("hasRole('CUSTOMER')")
+    // public ServiceBillingResponse getServiceBillingById(@CurrentUser UserPrincipal currentUser,
+    //                                                     @PathVariable String serviceType,
+    //                                                     @PathVariable Long serviceId,
+    //                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createDate,
+    //                                                     @PathVariable Long billingId) {
 
-        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-        if(!companyOptional.isPresent()){
-            logService.createLog("GET_SERVICE_BILLING_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + ",billingId=" + billingId + "]", "", "The customer has no company.");
-            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-        }
-        Long companyId = companyOptional.get().getId();
+    //     Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+    //     if(!companyOptional.isPresent()){
+    //         logService.createLog("GET_SERVICE_BILLING_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+    //                 "[serviceId=" + serviceId + ",billingId=" + billingId + "]", "", "The customer has no company.");
+    //         throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+    //     }
+    //     Long companyId = companyOptional.get().getId();
 
-        NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
-        if(serviceType.compareToIgnoreCase("vps") == 0)
-            srvType = NetmonTypes.SERVICE_TYPES.VPS;
+    //     NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
+    //     if(serviceType.compareToIgnoreCase("vps") == 0)
+    //         srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
-            logService.createLog("GET_SERVICE_BILLING_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + ",billingId=" + billingId + "]", "",
-                    "This service does not belong to the company.");
-            throw new AccessDeniedException("This service does not belong to the company.");
-        }
+    //     if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+    //         logService.createLog("GET_SERVICE_BILLING_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+    //                 "[serviceId=" + serviceId + ",billingId=" + billingId + "]", "",
+    //                 "This service does not belong to the company.");
+    //         throw new AccessDeniedException("This service does not belong to the company.");
+    //     }
 
-        return billingService.getServiceBillingById(billingId, currentUser);
-    }
+    //     return billingService.getServiceBillingById(billingId, currentUser);
+    // }
 
-    /**
-     * getting list of billings by service id
-     * @param currentUser the user id who currently logged in
-     * @param serviceType vps / collocation
-     * @param serviceId the unique service number
-     * @param page the page number of the response (default value is 0)
-     * @param size the page size of each response (default value is 30)
-     * @return billing responses page by page
-     */
-    @GetMapping("/{serviceType}/{serviceId}/billings/all")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public PagedResponse<ServiceBillingResponse> getServiceBillings(@CurrentUser UserPrincipal currentUser,
-                                                                    @PathVariable String serviceType,
-                                                                    @PathVariable ServiceIdentity serviceId,
-                                                                    @RequestParam(value = "page",
-                                                                            defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-                                                                    @RequestParam(value = "size",
-                                                                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+    // /**
+    //  * getting list of billings by service id
+    //  * @param currentUser the user id who currently logged in
+    //  * @param serviceType vps / collocation
+    //  * @param serviceId the unique service number
+    //  * @param createDate the service create date
+    //  * @param page the page number of the response (default value is 0)
+    //  * @param size the page size of each response (default value is 30)
+    //  * @return billing responses page by page
+    //  */
+    // @GetMapping("/{serviceType}/{serviceId}/billings/all")
+    // @PreAuthorize("hasRole('CUSTOMER')")
+    // public PagedResponse<ServiceBillingResponse> getServiceBillings(@CurrentUser UserPrincipal currentUser,
+    //                                                                 @PathVariable String serviceType,
+    //                                                                 @PathVariable Long serviceId,
+    //                                                                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createDate,
+    //                                                                 @RequestParam(value = "page",
+    //                                                                         defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+    //                                                                 @RequestParam(value = "size",
+    //                                                                         defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
 
-        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-        if(!companyOptional.isPresent()){
-            logService.createLog("GET_ALL_SERVICE_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + "]", "", "The customer has no company.");
-            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-        }
-        Long companyId = companyOptional.get().getId();
+    //     Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+    //     if(!companyOptional.isPresent()){
+    //         logService.createLog("GET_ALL_SERVICE_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+    //                 "[serviceId=" + serviceId + "]", "", "The customer has no company.");
+    //         throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+    //     }
+    //     Long companyId = companyOptional.get().getId();
 
-        NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
-        if(serviceType.compareToIgnoreCase("vps") == 0)
-            srvType = NetmonTypes.SERVICE_TYPES.VPS;
+    //     NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
+    //     if(serviceType.compareToIgnoreCase("vps") == 0)
+    //         srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
-            logService.createLog("GET_ALL_SERVICE_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[serviceId=" + serviceId + "]", "", "This service does not belong to the company.");
-            throw new AccessDeniedException("This service does not belong to the company.");
-        }
+    //     if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+    //         logService.createLog("GET_ALL_SERVICE_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+    //                 "[serviceId=" + serviceId + "]", "", "This service does not belong to the company.");
+    //         throw new AccessDeniedException("This service does not belong to the company.");
+    //     }
 
-        return billingService.getServiceBillings(currentUser, serviceId, page, size);
-    }
+    //     return billingService.getServiceBillings(currentUser, serviceId, page, size);
+    // }
 
     /**
      * create a new technical person
@@ -1419,7 +1432,7 @@ public class CustomerController {
 
             if (!servicePortRepository.existsByPortAndNetmonServiceId(port, netmonService.getId())) {
                 ServicePortRequest servicePortRequest = new ServicePortRequest(port, "");
-                portService.create(servicePortRequest, currentUser, netmonService.getId());
+                portService.create(servicePortRequest, currentUser, netmonService.getId(), netmonService.getCreateDate());
             }
         }
 
@@ -1465,7 +1478,7 @@ public class CustomerController {
      */
     @GetMapping("/vps/{vpsId}")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public VpsResponse getVPSById(@CurrentUser UserPrincipal currentUser, @PathVariable ServiceIdentity vpsId) {
+    public VpsResponse getVPSById(@CurrentUser UserPrincipal currentUser, @PathVariable Long vpsId) {
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
         if(!companyOptional.isPresent()){
             logService.createLog("GET_VPS_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
@@ -1516,7 +1529,7 @@ public class CustomerController {
     public ResponseEntity<?> confirmService(@Valid @RequestBody ServiceConfirmRequest serviceConfirmRequest,
                                             @CurrentUser UserPrincipal currentUser,
                                             @PathVariable String serviceType,
-                                            @PathVariable ServiceIdentity serviceId) {
+                                            @PathVariable Long serviceId) {
 
         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
         if(!companyOptional.isPresent()){

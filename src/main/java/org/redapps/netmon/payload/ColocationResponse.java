@@ -1,184 +1,192 @@
-package org.redapps.netmon.payload;
+// package org.redapps.netmon.payload;
 
-import org.redapps.netmon.model.ServiceIdentity;
-import org.redapps.netmon.util.NetmonStatus;
+// import java.time.LocalDate;
+// import org.redapps.netmon.util.NetmonStatus;
 
-import java.time.LocalDate;
+// public class ColocationResponse {
 
-public class ColocationResponse {
+//     private Long id;
+//     private LocalDate createDate;
+//     private String name;
+//     private int unitNumber;
+//     private String slaType;
+//     private String description;
+//     private int validIp;
+//     private int invalidIp;
+//     private NetmonStatus.ServiceStatus status;
+//     private LocalDate startDate;
+//     private Long duration;
+// //    private LocalDate endDate;
+//     private double paymentBase;
+//     private double discountPercent;
+//     private String usageType;
+//     private String rackPosition;
+//     private String technicalPersonId;
+//     private Long osTypeId;
 
-    private ServiceIdentity id;
-    private String name;
-    private int unitNumber;
-    private String slaType;
-    private String description;
-    private int validIp;
-    private int invalidIp;
-    private NetmonStatus.ServiceStatus status;
-    private LocalDate startDate;
-    private Long duration;
-//    private LocalDate endDate;
-    private double paymentBase;
-    private double discountPercent;
-    private String usageType;
-    private String rackPosition;
-    private String technicalPersonId;
-    private Long osTypeId;
+//     public ColocationResponse(Long id, String name, int unitNumber, String slaType,
+//                                String description, int validIp, int invalidIp, NetmonStatus.ServiceStatus status,
+//                                String usageType, String rackPosition, Long osTypeId,
+//                                LocalDate startDate, Long duration, double discountPercent) {
+//         this.id = id;
+//         this.createDate = createDate;
+//         this.name = name;
+//         this.unitNumber = unitNumber;
+//         this.slaType = slaType;
+//         this.description = description;
+//         this.validIp = validIp;
+//         this.invalidIp = invalidIp;
+//         this.status = status;
+//         this.usageType = usageType;
+//         this.rackPosition = rackPosition;
+//         this.osTypeId = osTypeId;
+//         this.startDate = startDate;
+//         this.duration = duration;
+//         this.discountPercent = discountPercent;
+//     }
 
-    public ColocationResponse(ServiceIdentity id, String name, int unitNumber, String slaType,
-                               String description, int validIp, int invalidIp, NetmonStatus.ServiceStatus status,
-                               String usageType, String rackPosition, Long osTypeId,
-                               LocalDate startDate, Long duration, double discountPercent) {
-        this.id = id;
-        this.name = name;
-        this.unitNumber = unitNumber;
-        this.slaType = slaType;
-        this.description = description;
-        this.validIp = validIp;
-        this.invalidIp = invalidIp;
-        this.status = status;
-        this.usageType = usageType;
-        this.rackPosition = rackPosition;
-        this.osTypeId = osTypeId;
-        this.startDate = startDate;
-        this.duration = duration;
-        this.discountPercent = discountPercent;
-    }
+//     public String getName() {
+//         return name;
+//     }
 
-    public String getName() {
-        return name;
-    }
+//     public void setName(String name) {
+//         this.name = name;
+//     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+//     public Long getId() {
+//         return id;
+//     }
 
-    public ServiceIdentity getId() {
-        return id;
-    }
+//     public void setId(Long id) {
+//         this.id = id;
+//     }
 
-    public void setId(ServiceIdentity id) {
-        this.id = id;
-    }
+//     public LocalDate getCreateDate() {
+//         return createDate;
+//     }
 
-    public int getUnitNumber() {
-        return unitNumber;
-    }
+//     public void setCreateDate(LocalDate createDate) {
+//         this.createDate = createDate;
+//     }
 
-    public void setUnitNumber(int unitNumber) {
-        this.unitNumber = unitNumber;
-    }
+//     public int getUnitNumber() {
+//         return unitNumber;
+//     }
 
-    public String getSlaType() {
-        return slaType;
-    }
+//     public void setUnitNumber(int unitNumber) {
+//         this.unitNumber = unitNumber;
+//     }
 
-    public void setSlaType(String slaType) {
-        this.slaType = slaType;
-    }
+//     public String getSlaType() {
+//         return slaType;
+//     }
 
-    public String getDescription() {
-        return description;
-    }
+//     public void setSlaType(String slaType) {
+//         this.slaType = slaType;
+//     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+//     public String getDescription() {
+//         return description;
+//     }
 
-    public int getValidIp() {
-        return validIp;
-    }
+//     public void setDescription(String description) {
+//         this.description = description;
+//     }
 
-    public void setValidIp(int validIp) {
-        this.validIp = validIp;
-    }
+//     public int getValidIp() {
+//         return validIp;
+//     }
 
-    public int getInvalidIp() {
-        return invalidIp;
-    }
+//     public void setValidIp(int validIp) {
+//         this.validIp = validIp;
+//     }
 
-    public void setInvalidIp(int invalidIp) {
-        this.invalidIp = invalidIp;
-    }
+//     public int getInvalidIp() {
+//         return invalidIp;
+//     }
 
-    public LocalDate getStartDate() {
-        return startDate;
-    }
+//     public void setInvalidIp(int invalidIp) {
+//         this.invalidIp = invalidIp;
+//     }
 
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
+//     public LocalDate getStartDate() {
+//         return startDate;
+//     }
 
-//    public LocalDate getEndDate() {
-//        return endDate;
-//    }
-//
-//    public void setEndDate(LocalDate endDate) {
-//        this.endDate = endDate;
-//    }
+//     public void setStartDate(LocalDate startDate) {
+//         this.startDate = startDate;
+//     }
+
+// //    public LocalDate getEndDate() {
+// //        return endDate;
+// //    }
+// //
+// //    public void setEndDate(LocalDate endDate) {
+// //        this.endDate = endDate;
+// //    }
 
 
-    public Long getDuration() {
-        return duration;
-    }
+//     public Long getDuration() {
+//         return duration;
+//     }
 
-    public void setDuration(Long duration) {
-        this.duration = duration;
-    }
+//     public void setDuration(Long duration) {
+//         this.duration = duration;
+//     }
 
-    public double getPaymentBase() {
-        return paymentBase;
-    }
+//     public double getPaymentBase() {
+//         return paymentBase;
+//     }
 
-    public void setPaymentBase(double paymentBase) {
-        this.paymentBase = paymentBase;
-    }
+//     public void setPaymentBase(double paymentBase) {
+//         this.paymentBase = paymentBase;
+//     }
 
-    public double getDiscountPercent() {
-        return discountPercent;
-    }
+//     public double getDiscountPercent() {
+//         return discountPercent;
+//     }
 
-    public void setDiscountPercent(double discountPercent) {
-        this.discountPercent = discountPercent;
-    }
+//     public void setDiscountPercent(double discountPercent) {
+//         this.discountPercent = discountPercent;
+//     }
 
-    public NetmonStatus.ServiceStatus getStatus() {
-        return status;
-    }
+//     public NetmonStatus.ServiceStatus getStatus() {
+//         return status;
+//     }
 
-    public void setStatus(NetmonStatus.ServiceStatus status) {
-        this.status = status;
-    }
+//     public void setStatus(NetmonStatus.ServiceStatus status) {
+//         this.status = status;
+//     }
 
-    public String getUsageType() {
-        return usageType;
-    }
+//     public String getUsageType() {
+//         return usageType;
+//     }
 
-    public void setUsageType(String usageType) {
-        this.usageType = usageType;
-    }
+//     public void setUsageType(String usageType) {
+//         this.usageType = usageType;
+//     }
 
-    public String getTechnicalPersonId() {
-        return technicalPersonId;
-    }
+//     public String getTechnicalPersonId() {
+//         return technicalPersonId;
+//     }
 
-    public void setTechnicalPersonId(String technicalPersonId) {
-        this.technicalPersonId = technicalPersonId;
-    }
+//     public void setTechnicalPersonId(String technicalPersonId) {
+//         this.technicalPersonId = technicalPersonId;
+//     }
 
-    public String getRackPosition() {
-        return rackPosition;
-    }
+//     public String getRackPosition() {
+//         return rackPosition;
+//     }
 
-    public void setRackPosition(String rackPosition) {
-        this.rackPosition = rackPosition;
-    }
+//     public void setRackPosition(String rackPosition) {
+//         this.rackPosition = rackPosition;
+//     }
 
-    public Long getOsTypeId() {
-        return osTypeId;
-    }
+//     public Long getOsTypeId() {
+//         return osTypeId;
+//     }
 
-    public void setOsTypeId(Long osTypeId) {
-        this.osTypeId = osTypeId;
-    }
-}
+//     public void setOsTypeId(Long osTypeId) {
+//         this.osTypeId = osTypeId;
+//     }
+// }

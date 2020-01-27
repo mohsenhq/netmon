@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 public class VpsResponse {
 
-    private ServiceIdentity id;
+    private Long id;
     private String name;
     private String description;
     private int validIp;
@@ -35,7 +35,7 @@ public class VpsResponse {
     private int type;
     private Long customerId;
 
-    public VpsResponse(ServiceIdentity serviceIdentity, String name, String description, int validIp, int invalidIp, boolean vnc,
+    public VpsResponse(Long serviceIdentity, String name, String description, int validIp, int invalidIp, boolean vnc,
                        NetmonStatus.ServiceStatus status, String usageType, Long vpsPlan, double extraRam,
                        double extraCpu, double extraDisk, double extraTraffic, Long technicalPersonId,
                        Long osTypeId, LocalDate startDate, Long duration, double discountPercent,
@@ -65,11 +65,11 @@ public class VpsResponse {
         this.customerId = customerId;
     }
 
-    public ServiceIdentity getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(ServiceIdentity id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

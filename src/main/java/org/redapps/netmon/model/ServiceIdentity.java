@@ -1,63 +1,33 @@
 package org.redapps.netmon.model;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.validation.constraints.NotNull;
-
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Objects;
 
-@Embeddable
 public class ServiceIdentity implements Serializable {
 
-    @NotNull
-    @Column(name = "SERVICE_ID")
-    private Long serviceId;
-
-    @NotNull
-    @Column(name = "CREATE_DATE")
+    private Long id;
     private LocalDate createDate;
 
-    // public ServiceIdentity() {
+    public ServiceIdentity() {
+    }
 
-    // }
-
-    public ServiceIdentity(Long serviceId, LocalDate createDate) {
-        this.serviceId = serviceId;
+    public ServiceIdentity(Long id, LocalDate createDate) {
+        this.id = id;
         this.createDate = createDate;
     }
 
-    public Long getServiceId() {
-        return serviceId;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ServiceIdentity serviceIdentity = (ServiceIdentity) o;
+        return id.equals(serviceIdentity.id) &&
+                createDate.equals(serviceIdentity.createDate);
     }
 
-    public void setServiceId(Long serviceId) {
-        this.serviceId = serviceId;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, createDate);
     }
-
-    public LocalDate getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(LocalDate createDate) {
-        this.createDate = createDate;
-    }
-
-    // @Override
-    // public boolean equals(Object o) {
-    //     if (this == o) return true;
-    //     if (o == null || getClass() != o.getClass()) return false;
-
-    //     ServiceIdentity that = (ServiceIdentity) o;
-
-    //     if (!serviceId.equals(that.serviceId)) return false;
-    //     return createDate.equals(that.createDate);
-    // }
-
-    // @Override
-    // public int hashCode() {
-    //     int result = serviceId.hashCode();
-    //     result = 31 * result + createDate.hashCode();
-    //     return result;
-    // }
 }
