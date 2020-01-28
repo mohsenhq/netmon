@@ -17,7 +17,7 @@ import java.time.LocalDate;
 public class NetmonService extends UserDateAudit {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @Id

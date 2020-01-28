@@ -409,45 +409,45 @@ public class TechnicalController {
 //                 .body(new ApiResponse(true, "The device updated successfully"));
 //     }
 
-    /**
-     * Create a new service port
-     * @param servicePortRequest the port information object
-     * @param currentUser the user id who currently logged in
-     * @param customerId the customer unique number who requested the service
-     * @param serviceType vps / collocation
-     * @param serviceId the unique service number
-     * @return OK response or report error
-     */
-    @PostMapping("/customers/{customerId}/{serviceType}/{serviceId}/ports/new")
-    @PreAuthorize("hasRole('TECHNICAL')")
-    public ResponseEntity<?> createServicePort(@Valid @RequestBody ServicePortRequest servicePortRequest,
-                                               @CurrentUser UserPrincipal currentUser,
-                                               @PathVariable Long customerId,
-                                               @PathVariable String serviceType,
-                                               @PathVariable Long serviceId) {
+//     /**
+//      * Create a new service port
+//      * @param servicePortRequest the port information object
+//      * @param currentUser the user id who currently logged in
+//      * @param customerId the customer unique number who requested the service
+//      * @param serviceType vps / collocation
+//      * @param serviceId the unique service number
+//      * @return OK response or report error
+//      */
+//     @PostMapping("/customers/{customerId}/{serviceType}/{serviceId}/ports/new")
+//     @PreAuthorize("hasRole('TECHNICAL')")
+//     public ResponseEntity<?> createServicePort(@Valid @RequestBody ServicePortRequest servicePortRequest,
+//                                                @CurrentUser UserPrincipal currentUser,
+//                                                @PathVariable Long customerId,
+//                                                @PathVariable String serviceType,
+//                                                @PathVariable Long serviceId) {
 
-        initialChecking("CREATE_SERVICE_PORT", currentUser.getUsername(), customerId,
-                serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + "]",
-                servicePortRequest.toString());
+//         initialChecking("CREATE_SERVICE_PORT", currentUser.getUsername(), customerId,
+//                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + "]",
+//                 servicePortRequest.toString());
 
-        LocalDate createDate = LocalDate.now();                                
-        if (servicePortRepository.existsByPortAndNetmonServiceId(servicePortRequest.getPort(), serviceId)) {
-            logService.createLog("CREATE_SERVICE_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + "]", servicePortRequest.toString(),
-                    "This port is already assigned to the service.");
-            return new ResponseEntity<>(new ApiResponse(false, "This port is already assigned to the service."),
-                    HttpStatus.BAD_REQUEST);
-        }
+//         LocalDate createDate = LocalDate.now();                                
+//         if (servicePortRepository.existsByPortAndNetmonServiceId(servicePortRequest.getPort(), serviceId)) {
+//             logService.createLog("CREATE_SERVICE_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+//                     "[customerId=" + customerId + ",serviceId=" + serviceId + "]", servicePortRequest.toString(),
+//                     "This port is already assigned to the service.");
+//             return new ResponseEntity<>(new ApiResponse(false, "This port is already assigned to the service."),
+//                     HttpStatus.BAD_REQUEST);
+//         }
 
-        Port servicePort = portService.create(servicePortRequest, currentUser, serviceId, createDate);
+//         Port servicePort = portService.create(servicePortRequest, currentUser, serviceId, createDate);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{portId}")
-                .buildAndExpand(servicePort.getId()).toUri();
+//         URI location = ServletUriComponentsBuilder
+//                 .fromCurrentRequest().path("/{portId}")
+//                 .buildAndExpand(servicePort.getId()).toUri();
 
-        return ResponseEntity.created(location)
-                .body(new ApiResponse(true, "The port created successfully."));
-    }
+//         return ResponseEntity.created(location)
+//                 .body(new ApiResponse(true, "The port created successfully."));
+//     }
 
     /**
      * Delete the service port

@@ -25,8 +25,8 @@ public class Port extends UserDateAudit {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumns ({
-        @JoinColumn(name = "service_id", nullable = false),
-        @JoinColumn(name = "CREATE_DATE", nullable = false)
+        @JoinColumn(name = "createDate", nullable = false),
+        @JoinColumn(name = "serviceId", nullable = false)
     })
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore

@@ -1429,8 +1429,7 @@ public class CustomerController {
 
         int[] ports = vpsRequest.getPorts();
         for (int port : ports) {
-
-            if (!servicePortRepository.existsByPortAndNetmonServiceId(port, netmonService.getId())) {
+            if (!servicePortRepository.existsByPortAndNetmonService(port, netmonService)) {
                 ServicePortRequest servicePortRequest = new ServicePortRequest(port, "");
                 portService.create(servicePortRequest, currentUser, netmonService.getId(), netmonService.getCreateDate());
             }
