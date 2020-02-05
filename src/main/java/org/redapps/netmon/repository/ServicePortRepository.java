@@ -1,5 +1,6 @@
 package org.redapps.netmon.repository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import org.redapps.netmon.model.NetmonService;
 import org.redapps.netmon.model.Port;
@@ -15,7 +16,7 @@ public interface ServicePortRepository extends JpaRepository<Port, Long> {
 
     Boolean existsByPortAndNetmonService(int port, NetmonService netmonService);
 
-    Boolean existsByIdAndNetmonServiceId(Long id, Long netmonServiceId);
+    Boolean existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(Long id, Long netmonServiceId, LocalDate netmonCreateDate);
 
-    Page<Port> findAllByNetmonServiceId(Long serviceId, Pageable pageable);
+    Page<Port> findAllByNetmonService(NetmonService netmonService, Pageable pageable);
 }

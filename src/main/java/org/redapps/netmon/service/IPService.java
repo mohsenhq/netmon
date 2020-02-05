@@ -44,6 +44,7 @@ public class IPService {
      * @param serviceIPRequest the ip information object
      * @param currentUser the user id who currently logged in
      * @param serviceId the unique service number
+     * @param createDate the service create date
      * @return ip
      */
     public IP create(ServiceIPRequest serviceIPRequest, UserPrincipal currentUser , Long serviceId, LocalDate createDate) {
@@ -55,7 +56,7 @@ public class IPService {
         IP ip = new IP(serviceIPRequest.getIp(), serviceIPRequest.getDescription(), netmonService);
 
         logService.createLog("CREATE_SERVICE_IP", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
-                "[serviceId=" + serviceId + "]", serviceIPRequest.toString(), "");
+                "[serviceId=" + serviceId + ",createDate=" + createDate + "]", serviceIPRequest.toString(), "");
 
         // store the object
         return serviceIPRepository.save(ip);
@@ -103,18 +104,20 @@ public class IPService {
 
     /**
      * @param serviceId the unique service number
+     * @param createDate the service create date
      * @param currentUser the user id who currently logged in
      * @param page the page number of the response (default value is 0)
      * @param size the page size of each response (default value is 30)
      * @return ip response page by page
      */
-    public PagedResponse<ServiceIPResponse> getServiceIps(Long serviceId, UserPrincipal currentUser,
+    public PagedResponse<ServiceIPResponse> getServiceIps(Long serviceId, LocalDate createDate, UserPrincipal currentUser,
                                                           int page, int size) {
         validatePageNumberAndSize(page, size);
 
-        // find all ips by service id
+        // find all ips by NetmonService
+        NetmonService netmonService = netmonServiceRepository.getOne(new ServiceIdentity(serviceId, createDate));
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        Page<IP> serviceIPs = serviceIPRepository.findByNetmonServiceId(serviceId, pageable);
+        Page<IP> serviceIPs = serviceIPRepository.findAllByNetmonService(netmonService, pageable);
 
         if(serviceIPs.getNumberOfElements() == 0) {
             return new PagedResponse<>(Collections.emptyList(), serviceIPs.getNumber(),
@@ -130,7 +133,7 @@ public class IPService {
         }
 
         logService.createLog("GET_IPS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
-                "[serviceId=" + serviceId + "]", "", "");
+                "[serviceId=" + serviceId + ",createDate=" + createDate + "]", "", "");
 
         return new PagedResponse<>(serviceIPResponses, serviceIPs.getNumber(),
                 serviceIPs.getSize(), serviceIPs.getTotalElements(), serviceIPs.getTotalPages(), serviceIPs.isLast());

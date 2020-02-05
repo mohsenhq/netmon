@@ -14,8 +14,8 @@ import java.util.Optional;
 public interface ServiceTicketRepository extends JpaRepository<Ticket, Long> {
     Optional<Ticket> findById(Long id);
 
-    boolean existsByIdAndNetmonServiceId(Long id, Long serviceId);
+    boolean existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(Long id, Long serviceId, LocalDate createDate);
 
-    Page<Ticket> findAllByNetmonServiceId(Long serviceId, Pageable pageable);
+    Page<Ticket> findAllByNetmonServiceId(Long serviceId, LocalDate createDate, Pageable pageable);
 
 }

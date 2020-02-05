@@ -9,6 +9,7 @@ import org.redapps.netmon.security.UserPrincipal;
 import org.redapps.netmon.util.AppConstants;
 import org.redapps.netmon.util.NetmonStatus;
 import org.redapps.netmon.util.NetmonTypes;
+import org.redapps.netmon.util.NetmonTypes.SERVICE_TYPES;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -222,7 +223,7 @@ public class NSService {
         Vector<VpsResponse> vpsResponses = new Vector<>(10);
         VpsResponse vpsResponse;
         for (NetmonService netmonService : netmonServicesPage) {
-            vpsResponse = new VpsResponse(netmonService.getId(), netmonService.getName(),
+            vpsResponse = new VpsResponse(netmonService.getId(), netmonService.getCreateDate(), netmonService.getName(),
                     netmonService.getDescription(), netmonService.getValidIp(), netmonService.getInvalidIp(),
                     netmonService.isVnc(),
                     netmonService.getStatus(), netmonService.getUsageType(), netmonService.getVpsPlan().getId(),
@@ -255,7 +256,7 @@ public class NSService {
 
         // find all vpses (type = 1)
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        Page<NetmonService> netmonServicesPage = netmonServiceRepository.findAllByServiceType(1, pageable);
+        Page<NetmonService> netmonServicesPage = netmonServiceRepository.findAllByServiceType(SERVICE_TYPES.VPS, pageable);
 
         if (netmonServicesPage.getNumberOfElements() == 0) {
             return new PagedResponse<>(Collections.emptyList(), netmonServicesPage.getNumber(),
@@ -267,7 +268,7 @@ public class NSService {
         Vector<VpsResponse> vpsResponses = new Vector<>(10);
         VpsResponse vpsResponse;
         for (NetmonService netmonService : netmonServicesPage) {
-            vpsResponse = new VpsResponse(netmonService.getId(), netmonService.getName(),
+            vpsResponse = new VpsResponse(netmonService.getId(), netmonService.getCreateDate(), netmonService.getName(),
                     netmonService.getDescription(), netmonService.getValidIp(), netmonService.getInvalidIp(),
                     netmonService.isVnc(),
                     netmonService.getStatus(), netmonService.getUsageType(), netmonService.getVpsPlan().getId(),
@@ -289,16 +290,17 @@ public class NSService {
 
     /**
      * @param vpsId the unique vps number
+     * @param createDate the service create date
      * @param currentUser the user id who currently logged in
      * @return vps response
      */
-    public VpsResponse getVPSById(Long vpsId, UserPrincipal currentUser) {
+    public VpsResponse getVPSById(Long vpsId, LocalDate createDate, UserPrincipal currentUser) {
 
         // find the service by id
         Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(vpsId);
         if (!netmonServiceOptional.isPresent()) {
             logService.createLog("GET_VPS_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[vpsId=" + vpsId + "]", "", "This VPS does not exists.");
+                    "[vpsId=" + vpsId + ",createDate=" + createDate + "]", "", "This VPS does not exists.");
             throw new ResourceNotFoundException("VPS", "vpsId", vpsId);
         }
 
@@ -307,7 +309,7 @@ public class NSService {
                 "[vpsId=" + vpsId + "]", "", "");
 
         // create a new response object
-        return new VpsResponse(netmonService.getId(), netmonService.getName(), netmonService.getDescription(),
+        return new VpsResponse(netmonService.getId(), netmonService.getCreateDate(), netmonService.getName(), netmonService.getDescription(),
                 netmonService.getValidIp(), netmonService.getInvalidIp(), netmonService.isVnc(),
                 netmonService.getStatus(),
                 netmonService.getUsageType(), netmonService.getVpsPlan().getId(), netmonService.getExtraRam(),
@@ -324,7 +326,7 @@ public class NSService {
      * @param serviceConfirmRequest the service information object to confirm
      * @return a new service object
      */
-    public NetmonService managerConfirmService(UserPrincipal currentUser, Long serviceId,
+    public NetmonService managerConfirmService(UserPrincipal currentUser, Long serviceId, LocalDate createDate,
                                                ServiceConfirmRequest serviceConfirmRequest) {
 
         // find the service by id
@@ -360,10 +362,11 @@ public class NSService {
     /**
      * @param currentUser the user id who currently logged in
      * @param serviceId the unique service number
+     * @param createDate the service create date
      * @param serviceConfirmRequest the service information object to confirm
      * @return a new service object
      */
-    public NetmonService customerConfirmService(UserPrincipal currentUser, Long serviceId,
+    public NetmonService customerConfirmService(UserPrincipal currentUser, Long serviceId, LocalDate createDate,
                                                 ServiceConfirmRequest serviceConfirmRequest) {
 
         // find the service by id
@@ -396,7 +399,7 @@ public class NSService {
      * @param renameServiceRequest the new name of service and start date
      * @return a new service object
      */
-    public NetmonService renameService(UserPrincipal currentUser, Long serviceId,
+    public NetmonService renameService(UserPrincipal currentUser, Long serviceId, LocalDate createDate,
                                        RenameServiceRequest renameServiceRequest) {
 
         // find a service by id

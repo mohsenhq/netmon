@@ -1,7 +1,6 @@
 package org.redapps.netmon.payload;
 
 
-import org.redapps.netmon.model.ServiceIdentity;
 import org.redapps.netmon.util.NetmonStatus;
 
 import java.time.LocalDate;
@@ -9,6 +8,7 @@ import java.time.LocalDate;
 public class VpsResponse {
 
     private Long id;
+    private LocalDate createDate;
     private String name;
     private String description;
     private int validIp;
@@ -35,12 +35,13 @@ public class VpsResponse {
     private int type;
     private Long customerId;
 
-    public VpsResponse(Long serviceIdentity, String name, String description, int validIp, int invalidIp, boolean vnc,
+    public VpsResponse(Long id, LocalDate createDate, String name, String description, int validIp, int invalidIp, boolean vnc,
                        NetmonStatus.ServiceStatus status, String usageType, Long vpsPlan, double extraRam,
                        double extraCpu, double extraDisk, double extraTraffic, Long technicalPersonId,
                        Long osTypeId, LocalDate startDate, Long duration, double discountPercent,
                        double price, double finalPrice, double extraPrice, int type, Long customerId) {
-        this.id = serviceIdentity;
+        this.id = id;
+        this.createDate = createDate;
         this.name = name;
         this.description = description;
         this.validIp = validIp;
@@ -72,6 +73,15 @@ public class VpsResponse {
     public void setId(Long id) {
         this.id = id;
     }
+
+    public LocalDate getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(LocalDate createDate) {
+        this.createDate = createDate;
+    }
+
 
     public String getDescription() {
         return description;

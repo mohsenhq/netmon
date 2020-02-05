@@ -18,10 +18,10 @@ public interface NetmonServiceRepository extends JpaRepository<NetmonService, Se
 
     Page<NetmonService> findAllByServiceTypeAndCompanyId(NetmonTypes.SERVICE_TYPES serviceType, Long companyId, Pageable pageable);
 
-    Page<NetmonService> findAllByServiceType(int serviceType, Pageable pageable);
+    Page<NetmonService> findAllByServiceType(NetmonTypes.SERVICE_TYPES serviceType, Pageable pageable);
 
     boolean existsByTechnicalPersonId(Long technicalPersonId);
 
-    boolean existsByIdAndCompanyIdAndServiceType(Long netmonServiceId, Long companyId,
+    boolean existsByIdAndCreateDateAndCompanyIdAndServiceType(Long netmonServiceId, LocalDate creaDate, Long companyId,
                                                  NetmonTypes.SERVICE_TYPES serviceType);
 }

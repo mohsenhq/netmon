@@ -41,6 +41,7 @@ public class PortService {
      * @param servicePortRequest the port information object
      * @param currentUser the user id who currently logged in
      * @param serviceId the unique service number
+     * @param createDate the service create date
      * @return port response
      */
     public Port create(ServicePortRequest servicePortRequest, UserPrincipal currentUser, Long serviceId, LocalDate createDate) {
@@ -105,17 +106,19 @@ public class PortService {
     /**
      * @param currentUser the user id who currently logged in
      * @param serviceId the unique service number
+     * @param createDate the service create date
      * @param page the page number of the response (default value is 0)
      * @param size the page size of each response (default value is 30)
      * @return port responses page by page
      */
-    public PagedResponse<ServicePortResponse> getServicePorts(UserPrincipal currentUser, Long serviceId,
+    public PagedResponse<ServicePortResponse> getServicePorts(UserPrincipal currentUser, Long serviceId, LocalDate createDate,
                                                               int page, int size) {
         validatePageNumberAndSize(page, size);
 
         // find all ports by service id and sorted by createdAt
+        NetmonService netmonService = netmonServiceRepository.getOne(new ServiceIdentity(serviceId, createDate));
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        Page<Port> servicePorts = servicePortRepository.findAllByNetmonServiceId(serviceId, pageable);
+        Page<Port> servicePorts = servicePortRepository.findAllByNetmonService(netmonService, pageable);
 
         if(servicePorts.getNumberOfElements() == 0) {
             return new PagedResponse<>(Collections.emptyList(), servicePorts.getNumber(),

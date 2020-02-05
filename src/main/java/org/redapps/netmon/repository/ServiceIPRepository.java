@@ -1,7 +1,7 @@
 package org.redapps.netmon.repository;
 
 import org.redapps.netmon.model.IP;
-import org.redapps.netmon.model.ServiceIdentity;
+import org.redapps.netmon.model.NetmonService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,11 +15,11 @@ import java.util.Optional;
 public interface ServiceIPRepository extends JpaRepository<IP, Long> {
     Optional<IP> findById(Long id);
 
-    List<IP> findByNetmonServiceId(Long serviceId);
+    List<IP> findAllByNetmonService(NetmonService netmonService);
+    
+    Page<IP> findAllByNetmonService(NetmonService netmonService, Pageable pageable);
 
-    Page<IP> findByNetmonServiceId(Long serviceId, Pageable pageable);
+    Boolean existsByIpAndNetmonServiceIdAndNetmonServiceCreateDate(String ip, Long serviceId, LocalDate createDate);
 
-    Boolean existsByIpAndNetmonServiceId(String ip, Long serviceId);
-
-    Boolean existsByIdAndNetmonServiceId(Long id, Long serviceId);
+    Boolean existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(Long id, Long serviceId, LocalDate createDate);
 }

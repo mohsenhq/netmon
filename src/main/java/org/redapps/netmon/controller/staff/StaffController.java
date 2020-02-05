@@ -139,7 +139,7 @@ public class StaffController {
     // Long companyId = companyOptional.get().getId();
 
     // if
-    // (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(colocationId,
+    // (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(colocationId,
     // companyId,
     // NetmonTypes.SERVICE_TYPES.COLOCATION)) {
     // logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(),
@@ -228,36 +228,37 @@ public class StaffController {
      * @param currentUser the user id who currently logged in
      * @param customerId  the customer unique number who requested the service
      * @param vpsId       the unique vps number
+     * @param createDate the service create date
      * @return vps response
      */
-    @GetMapping("/customers/{customerId}/vps/{vpsId}")
+    @GetMapping("/customers/{customerId}/vps/{vpsId}/{createDate}")
     @PreAuthorize("hasRole('TECHNICAL') OR hasRole('MANAGER')")
     public VpsResponse getVPSById(@CurrentUser UserPrincipal currentUser, @PathVariable Long customerId,
-            @PathVariable Long vpsId) {
+            @PathVariable Long vpsId, @PathVariable String createDate) {
 
         if (!userRepository.existsById(customerId)) {
             logService.createLog("GET_VPS_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",vpsId=" + vpsId + "]", "", "The customer does not exists.");
+                    "[customerId=" + customerId + ",vpsId=" + vpsId + ",createDate=" + createDate + "]", "", "The customer does not exists.");
             throw new ResourceNotFoundException("Customer", "customerId", customerId);
         }
 
         Optional<Company> companyOptional = companyRepository.findByUserId(customerId);
         if (!companyOptional.isPresent()) {
             logService.createLog("GET_VPS_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",vpsId=" + vpsId + "]", "", "The customer has no company.");
+                    "[customerId=" + customerId + ",vpsId=" + vpsId + ",createDate=" + createDate + "]", "", "The customer has no company.");
             throw new ResourceNotFoundException("Company", "userId", customerId);
         }
         Long companyId = companyOptional.get().getId();
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(vpsId, companyId,
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(vpsId, LocalDate.parse(createDate), companyId,
                 NetmonTypes.SERVICE_TYPES.VPS)) {
             logService.createLog("GET_VPS_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",vpsId=" + vpsId + "]", "",
+                    "[customerId=" + customerId + ",vpsId=" + vpsId + ",createDate=" + createDate + "]", "",
                     "This service does not belong to the company.");
             throw new AccessDeniedException("This service does not belong to the company.");
         }
 
-        return nsService.getVPSById(vpsId, currentUser);
+        return nsService.getVPSById(vpsId, LocalDate.parse(createDate), currentUser);
     }
 
     /**
@@ -284,27 +285,29 @@ public class StaffController {
      * @param customerId  the customer unique number who requested the service
      * @param serviceType vps / collocation
      * @param serviceId   the unique service number
+     * @param createDate the service create date
      * @param page        the page number of the response (default value is 0)
      * @param size        the page size of each response (default value is 30)
      * @return ip responses page by page
      */
-    @GetMapping("/customers/{customerId}/{serviceType}/{serviceId}/ips/all")
+    @GetMapping("/customers/{customerId}/{serviceType}/{serviceId}/{createDate}/ips/all")
     @PreAuthorize("hasRole('TECHNICAL') OR hasRole('MANAGER')")
     public PagedResponse<ServiceIPResponse> getServiceIPs(@CurrentUser UserPrincipal currentUser,
             @PathVariable Long customerId, @PathVariable String serviceType, @PathVariable Long serviceId,
+            @PathVariable String createDate,
             @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
             @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
 
         if (!userRepository.existsById(customerId)) {
             logService.createLog("GET_SERVICE_IPS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + "]", "", "The customer does not exists.");
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]", "", "The customer does not exists.");
             throw new ResourceNotFoundException("Customer", "customerId", customerId);
         }
 
         Optional<Company> companyOptional = companyRepository.findByUserId(customerId);
         if (!companyOptional.isPresent()) {
             logService.createLog("GET_SERVICE_IPS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + "]", "", "The customer has no company.");
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]", "", "The customer has no company.");
             throw new ResourceNotFoundException("Company", "userId", customerId);
         }
         Long companyId = companyOptional.get().getId();
@@ -313,14 +316,14 @@ public class StaffController {
         if (serviceType.compareToIgnoreCase("vps") == 0)
             srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId, LocalDate.parse(createDate), companyId, srvType)) {
             logService.createLog("GET_SERVICE_IPS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + "]", "",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]", "",
                     "This service does not belong to the company.");
             throw new AccessDeniedException("This service does not belong to the company.");
         }
 
-        return ipService.getServiceIps(serviceId, currentUser, page, size);
+        return ipService.getServiceIps(serviceId, LocalDate.parse(createDate), currentUser, page, size);
     }
 
     /**
@@ -330,17 +333,18 @@ public class StaffController {
      * @param customerId  the customer unique number who requested the service
      * @param serviceType vps / collocation
      * @param serviceId   the unique service number
+     * @param createDate the service create date
      * @param IPId        the unique ip number
      * @return ip response
      */
     @GetMapping("/customers/{customerId}/{serviceType}/{serviceId}/ips/{IPId}")
     @PreAuthorize("hasRole('TECHNICAL') OR hasRole('MANAGER')")
     public ServiceIPResponse getServiceIPById(@CurrentUser UserPrincipal currentUser, @PathVariable Long customerId,
-            @PathVariable String serviceType, @PathVariable Long serviceId, @PathVariable Long IPId) {
+            @PathVariable String serviceType, @PathVariable Long serviceId, @PathVariable String createDate, @PathVariable Long IPId) {
 
         if (!userRepository.existsById(customerId)) {
             logService.createLog("GET_SERVICE_IP_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + IPId + "]", "",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ipId=" + IPId + "]", "",
                     "The customer does not exists.");
             throw new ResourceNotFoundException("Customer", "customerId", customerId);
         }
@@ -348,7 +352,7 @@ public class StaffController {
         Optional<Company> companyOptional = companyRepository.findByUserId(customerId);
         if (!companyOptional.isPresent()) {
             logService.createLog("GET_SERVICE_IP_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + IPId + "]", "",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ipId=" + IPId + "]", "",
                     "The customer has no company.");
             throw new ResourceNotFoundException("Company", "userId", customerId);
         }
@@ -358,9 +362,9 @@ public class StaffController {
         if (serviceType.compareToIgnoreCase("vps") == 0)
             srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId, LocalDate.parse(createDate), companyId, srvType)) {
             logService.createLog("GET_SERVICE_IP_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + IPId + "]", "",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ipId=" + IPId + "]", "",
                     "This service does not belong to the company.");
             throw new AccessDeniedException("This service does not belong to the company.");
         }
@@ -376,21 +380,23 @@ public class StaffController {
      * @param customerId  the customer unique number who requested the service
      * @param serviceType vps / collocation
      * @param serviceId   the unique service number
+     * @param createDate the service create date
      * @param ipId        the unique ip number
      * @param currentUser the user id who currently logged in
      * @return ip usage response
      */
-    @GetMapping("/customers/{customerId}/{serviceType}/{serviceId}/ip/{ipId}/usage")
+    @GetMapping("/customers/{customerId}/{serviceType}/{serviceId}/{createDate}/ip/{ipId}/usage")
     @PreAuthorize("hasRole('TECHNICAL') OR hasRole('MANAGER')")
     public IpUsageResponse getServiceIpUsage(
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @PathVariable Long customerId, @PathVariable String serviceType, @PathVariable Long serviceId,
+            @PathVariable String createDate,
             @PathVariable Long ipId, @CurrentUser UserPrincipal currentUser) {
 
         if (!userRepository.existsById(customerId)) {
             logService.createLog("GET_IP_USAGE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + ipId + ",startDate="
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ipId=" + ipId + ",startDate="
                             + startDate + ",endDate=" + endDate + "]",
                     "", "The customer does not exists.");
             throw new ResourceNotFoundException("Customer", "customerId", customerId);
@@ -399,7 +405,7 @@ public class StaffController {
         Optional<Company> companyOptional = companyRepository.findByUserId(customerId);
         if (!companyOptional.isPresent()) {
             logService.createLog("GET_IP_USAGE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + ipId + ",startDate="
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ipId=" + ipId + ",startDate="
                             + startDate + ",endDate=" + endDate + "]",
                     "", "The customer has no company.");
             throw new ResourceNotFoundException("Company", "userId", customerId);
@@ -410,18 +416,18 @@ public class StaffController {
         if (serviceType.compareToIgnoreCase("vps") == 0)
             srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId, LocalDate.parse(createDate), companyId, srvType)) {
             logService.createLog("GET_IP_USAGE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + ipId + ",startDate="
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ipId=" + ipId + ",startDate="
                             + startDate + ",endDate=" + endDate + "]",
                     "", "This service does not belong to the company.");
             throw new AccessDeniedException("This service does not belong to the company.");
         }
 
-        if (!serviceIPRepository.existsByIdAndNetmonServiceId(ipId, serviceId)) {
+        if (!serviceIPRepository.existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(ipId, serviceId, LocalDate.parse(createDate))) {
             logService
                     .createLog("GET_IP_USAGE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                            "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + ipId + ",startDate="
+                            "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ipId=" + ipId + ",startDate="
                                     + startDate + ",endDate=" + endDate + "]",
                             "", "This ip does not belong to the service.");
             throw new AccessDeniedException("This ip does not belong to the service.");
@@ -429,7 +435,7 @@ public class StaffController {
 
         if (endDate.isBefore(startDate)) {
             logService.createLog("GET_IP_USAGE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + ipId + ",startDate="
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ipId=" + ipId + ",startDate="
                             + startDate + ",endDate=" + endDate + "]",
                     "", "The endDate is smaller than the startDate.");
             throw new BadRequestException("The endDate is smaller than the startDate.");
@@ -444,7 +450,7 @@ public class StaffController {
         Vector<IpUsage> ipDownUsages = ProcessIpUsageFiles.processFiles(startDate, endDate, ip.getIp(), "dl.csv");
 
         logService.createLog("GET_IP_USAGE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
-                "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + ipId + ",startDate=" + startDate
+                "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ipId=" + ipId + ",startDate=" + startDate
                         + ",endDate=" + endDate + "]",
                 "", "");
 
@@ -490,7 +496,7 @@ public class StaffController {
     // Long companyId = companyOptional.get().getId();
 
     // if
-    // (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(colocationId,
+    // (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(colocationId,
     // companyId,
     // NetmonTypes.SERVICE_TYPES.COLOCATION)) {
     // logService.createLog("GET_ALL_COLOCATION_DEVICES", currentUser.getUsername(),
@@ -541,7 +547,7 @@ public class StaffController {
     // Long companyId = companyOptional.get().getId();
 
     // if
-    // (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(colocationId,
+    // (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(colocationId,
     // companyId,
     // NetmonTypes.SERVICE_TYPES.COLOCATION)) {
     // logService.createLog("GET_COLOCATION_DEVICE_INFO", currentUser.getUsername(),
@@ -564,27 +570,29 @@ public class StaffController {
      * @param customerId  the customer unique number who requested the service
      * @param serviceType vps / collocation
      * @param serviceId   the unique service number
+     * @param createDate the service create date
      * @param page        the page number of the response (default value is 0)
      * @param size        the page size of each response (default value is 30)
      * @return port responses page by page
      */
-    @GetMapping("/customers/{customerId}/{serviceType}/{serviceId}/ports/all")
+    @GetMapping("/customers/{customerId}/{serviceType}/{serviceId}/{createDate}/ports/all")
     @PreAuthorize("hasRole('TECHNICAL') OR hasRole('MANAGER')")
     public PagedResponse<ServicePortResponse> getServicePorts(@CurrentUser UserPrincipal currentUser,
             @PathVariable Long customerId, @PathVariable String serviceType, @PathVariable Long serviceId,
+            @PathVariable String createDate,
             @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
             @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
 
         if (!userRepository.existsById(customerId)) {
             logService.createLog("GET_ALL_SERVICE_PORTS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + "]", "", "The customer does not exists.");
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]", "", "The customer does not exists.");
             throw new ResourceNotFoundException("Customer", "customerId", customerId);
         }
 
         Optional<Company> companyOptional = companyRepository.findByUserId(customerId);
         if (!companyOptional.isPresent()) {
             logService.createLog("GET_ALL_SERVICE_PORTS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + "]", "", "The customer has no company.");
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]", "", "The customer has no company.");
             throw new ResourceNotFoundException("Company", "userId", customerId);
         }
         Long companyId = companyOptional.get().getId();
@@ -593,14 +601,14 @@ public class StaffController {
         if (serviceType.compareToIgnoreCase("vps") == 0)
             srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId, LocalDate.parse(createDate), companyId, srvType)) {
             logService.createLog("GET_ALL_SERVICE_PORTS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + "]", "",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]", "",
                     "This service does not belong to the company.");
             throw new AccessDeniedException("This service does not belong to the company.");
         }
 
-        return portService.getServicePorts(currentUser, serviceId, page, size);
+        return portService.getServicePorts(currentUser, serviceId, LocalDate.parse(createDate), page, size);
     }
 
     /**
@@ -610,17 +618,18 @@ public class StaffController {
      * @param customerId  the customer unique number who requested the service
      * @param serviceType vps / collocation
      * @param serviceId   the unique service number
+     * @param createDate the service create date
      * @param portId      the unique port number
      * @return post response
      */
-    @GetMapping("/customers/{customerId}/{serviceType}/{serviceId}/ports/{PortId}")
+    @GetMapping("/customers/{customerId}/{serviceType}/{serviceId}/{createDate}/ports/{PortId}")
     @PreAuthorize("hasRole('TECHNICAL') OR hasRole('MANAGER')")
     public ServicePortResponse getServicePortById(@CurrentUser UserPrincipal currentUser, @PathVariable Long customerId,
-            @PathVariable String serviceType, @PathVariable Long serviceId, @PathVariable Long portId) {
+            @PathVariable String serviceType, @PathVariable Long serviceId, @PathVariable String createDate, @PathVariable Long portId) {
 
         if (!userRepository.existsById(customerId)) {
             logService.createLog("GET_SERVICE_PORT_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",portId=" + portId + "]", "",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",portId=" + portId + "]", "",
                     "The customer does not exists.");
             throw new ResourceNotFoundException("Customer", "customerId", customerId);
         }
@@ -628,7 +637,7 @@ public class StaffController {
         Optional<Company> companyOptional = companyRepository.findByUserId(customerId);
         if (!companyOptional.isPresent()) {
             logService.createLog("GET_SERVICE_PORT_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",portId=" + portId + "]", "",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",portId=" + portId + "]", "",
                     "The customer has no company.");
             throw new ResourceNotFoundException("Company", "userId", customerId);
         }
@@ -638,9 +647,9 @@ public class StaffController {
         if (serviceType.compareToIgnoreCase("vps") == 0)
             srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId, LocalDate.parse(createDate), companyId, srvType)) {
             logService.createLog("GET_SERVICE_PORT_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",portId=" + portId + "]", "",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",portId=" + portId + "]", "",
                     "This service does not belong to the company.");
             throw new AccessDeniedException("This service does not belong to the company.");
         }
@@ -655,26 +664,28 @@ public class StaffController {
      * @param customerId  the customer unique number who requested the service
      * @param serviceType vps / collocation
      * @param serviceId   the unique service number
+     * @param createDate the service create date
      * @param page        the page number of the response (default value is 0)
      * @param size        the page size of each response (default value is 30)
      * @return ticket responses page by page
      */
-    @GetMapping("/customers/{customerId}/{serviceType}/{serviceId}/tickets/all")
+    @GetMapping("/customers/{customerId}/{serviceType}/{serviceId}/{createDate}/tickets/all")
     @PreAuthorize("hasRole('TECHNICAL') OR hasRole('MANAGER')")
     public PagedResponse<ServiceTicketResponse> getServiceTickets(@CurrentUser UserPrincipal currentUser,
             @PathVariable Long customerId, @PathVariable String serviceType, @PathVariable Long serviceId,
+            @PathVariable String createDate,
             @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
             @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
         if (!userRepository.existsById(customerId)) {
             logService.createLog("GET_ALL_SERVICE_TICKETS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + "]", "", "The customer does not exists.");
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]", "", "The customer does not exists.");
             throw new ResourceNotFoundException("Customer", "customerId", customerId);
         }
 
         Optional<Company> companyOptional = companyRepository.findByUserId(customerId);
         if (!companyOptional.isPresent()) {
             logService.createLog("GET_ALL_SERVICE_TICKETS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + "],serviceId=" + serviceId + "]", "", "The customer has no company.");
+                    "[customerId=" + customerId + "],serviceId=" + serviceId + ",createDate=" + createDate + "]", "", "The customer has no company.");
             throw new ResourceNotFoundException("Company", "userId", customerId);
         }
         Long companyId = companyOptional.get().getId();
@@ -683,14 +694,14 @@ public class StaffController {
         if (serviceType.compareToIgnoreCase("vps") == 0)
             srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId, LocalDate.parse(createDate), companyId, srvType)) {
             logService.createLog("GET_ALL_SERVICE_TICKETS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + "]", "",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]", "",
                     "This service does not belong to the company.");
             throw new AccessDeniedException("This service does not belong to the company.");
         }
 
-        return ticketService.getServiceTickets(currentUser, serviceId, page, size);
+        return ticketService.getServiceTickets(currentUser, serviceId, LocalDate.parse(createDate), page, size);
     }
 
     /**
@@ -700,17 +711,18 @@ public class StaffController {
      * @param customerId  the customer unique number who requested the service
      * @param serviceType vps / collocation
      * @param serviceId   the unique service number
+     * @param createDate the service create date
      * @param ticketId    the unique ticket number
      * @return ticket response
      */
-    @GetMapping("/customers/{customerId}/{serviceType}/{serviceId}/tickets/{ticketId}")
+    @GetMapping("/customers/{customerId}/{serviceType}/{serviceId}/{createDate}/tickets/{ticketId}")
     @PreAuthorize("hasRole('TECHNICAL') OR hasRole('MANAGER')")
     public ServiceTicketResponse getServiceTicketById(@CurrentUser UserPrincipal currentUser,
             @PathVariable Long customerId, @PathVariable String serviceType, @PathVariable Long serviceId,
-            @PathVariable Long ticketId) {
+            @PathVariable String createDate, @PathVariable Long ticketId) {
         if (!userRepository.existsById(customerId)) {
             logService.createLog("GET_SERVICE_TICKET_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",ticketId=" + ticketId + "]", "",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ticketId=" + ticketId + "]", "",
                     "The customer does not exists.");
             throw new ResourceNotFoundException("Customer", "customerId", customerId);
         }
@@ -718,7 +730,7 @@ public class StaffController {
         Optional<Company> companyOptional = companyRepository.findByUserId(customerId);
         if (!companyOptional.isPresent()) {
             logService.createLog("GET_SERVICE_TICKET_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",ticketId=" + ticketId + "]", "",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ticketId=" + ticketId + "]", "",
                     "The customer has no company.");
             throw new ResourceNotFoundException("Company", "userId", customerId);
         }
@@ -728,9 +740,9 @@ public class StaffController {
         if (serviceType.compareToIgnoreCase("vps") == 0)
             srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId, LocalDate.parse(createDate), companyId, srvType)) {
             logService.createLog("GET_SERVICE_TICKET_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",ticketId=" + ticketId + "]", "",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ticketId=" + ticketId + "]", "",
                     "This service does not belong to the company.");
             throw new AccessDeniedException("This service does not belong to the company.");
         }
@@ -784,7 +796,7 @@ public class StaffController {
     // if(serviceType.compareToIgnoreCase("vps") == 0)
     // srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-    // if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId,
+    // if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId,
     // companyId, srvType)) {
     // logService.createLog("GET_ALL_SERVICE_BILLING", currentUser.getUsername(),
     // NetmonStatus.LOG_STATUS.FAILED,
@@ -842,7 +854,7 @@ public class StaffController {
     // if(serviceType.compareToIgnoreCase("vps") == 0)
     // srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-    // if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId,
+    // if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId,
     // companyId, srvType)) {
     // logService.createLog("GET_SERVICE_BILLING_INFO", currentUser.getUsername(),
     // NetmonStatus.LOG_STATUS.FAILED,
@@ -909,20 +921,20 @@ public class StaffController {
     // return nsService.getColocationById(colocationId, currentUser);
     // }
 
-    // /**
-    // * getting info of a vps by id
-    // * @param currentUser the user id who currently logged in
-    // * @param vpsId the unique vps number
-    // * @return vps response
-    // */
-    // @GetMapping("/vps/{vpsId}")
-    // @PreAuthorize("hasRole('OFFICE') OR hasRole('MANAGER') OR
-    // hasRole('TECHNICAL')")
-    // public VpsResponse getVPSById(@CurrentUser UserPrincipal currentUser,
-    // @PathVariable Long vpsId) {
+    /**
+    * getting info of a vps by id
+    * @param currentUser the user id who currently logged in
+    * @param vpsId the unique vps number
+    * @param createDate the service create date
+    * @return vps response
+    */
+    @GetMapping("/vps/{vpsId}/{createDate}")
+    @PreAuthorize("hasRole('OFFICE') OR hasRole('MANAGER') OR hasRole('TECHNICAL')")
+    public VpsResponse getVPSById(@CurrentUser UserPrincipal currentUser,
+    @PathVariable Long vpsId, @PathVariable String createDate) {
 
-    // return nsService.getVPSById(vpsId, currentUser);
-    // }
+    return nsService.getVPSById(vpsId, LocalDate.parse(createDate), currentUser);
+    }
 
     // /**
     // * creating a billing for a service
@@ -973,7 +985,7 @@ public class StaffController {
     // if(serviceType.compareToIgnoreCase("vps") == 0)
     // srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-    // if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId,
+    // if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId,
     // companyId, srvType)) {
     // logService.createLog("CALCULATE_BILLING", currentUser.getUsername(),
     // NetmonStatus.LOG_STATUS.FAILED,
@@ -1059,7 +1071,7 @@ public class StaffController {
     // if(serviceType.compareToIgnoreCase("vps") == 0)
     // srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-    // if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId,
+    // if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId,
     // companyId, srvType)) {
     // logService.createLog("UPDATE_BILLING", currentUser.getUsername(),
     // NetmonStatus.LOG_STATUS.FAILED,
@@ -1119,7 +1131,7 @@ public class StaffController {
     // if(serviceType.compareToIgnoreCase("vps") == 0)
     // srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-    // if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId,
+    // if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId,
     // companyId, srvType)) {
     // logService.createLog("UPDATE_BILLING", currentUser.getUsername(),
     // NetmonStatus.LOG_STATUS.FAILED,

@@ -18,7 +18,7 @@
 
 //     List<Device> findAllByNetmonServiceId(Long colocationId);
 
-//     boolean existsByIdAndNetmonServiceId(Long deviceId, Long colocationId);
+//     boolean existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(Long deviceId, Long colocationId);
 
 
 // }

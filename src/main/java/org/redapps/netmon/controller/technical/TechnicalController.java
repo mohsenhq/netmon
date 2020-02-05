@@ -141,31 +141,32 @@ public class TechnicalController {
      * @param customerId the customer unique number who requested the service the customer unique number who requested the service
      * @param serviceType vps / collocation
      * @param serviceId the unique service number
+     * @param createDate the service create date
      * @return OK response or report error
      */
-    @PostMapping("/customers/{customerId}/{serviceType}/{serviceId}/ips/new")
+    @PostMapping("/customers/{customerId}/{serviceType}/{serviceId}/{createDate}/ips/new")
     @PreAuthorize("hasRole('TECHNICAL')")
     public ResponseEntity<?> createServiceIP(@Valid @RequestBody ServiceIPRequest serviceIPRequest,
                                              @CurrentUser UserPrincipal currentUser,
                                              @PathVariable Long customerId,
                                              @PathVariable String serviceType,
-                                             @PathVariable Long serviceId) {
+                                             @PathVariable Long serviceId,
+                                             @PathVariable String createDate) {
 
         initialChecking("CREATE_COLOCATION_IP", currentUser.getUsername(), customerId,
-                serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + "]",
+                serviceType, serviceId, LocalDate.parse(createDate), "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]",
                 serviceIPRequest.toString());
 
         // Check if ip is already assigned to this service or not
-        if (serviceIPRepository.existsByIpAndNetmonServiceId(serviceIPRequest.getIp(), serviceId)) {
+        if (serviceIPRepository.existsByIpAndNetmonServiceIdAndNetmonServiceCreateDate(serviceIPRequest.getIp(), serviceId, LocalDate.parse(createDate))) {
             logService.createLog("CREATE_COLOCATION_IP", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + "]", serviceIPRequest.toString(),
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]", serviceIPRequest.toString(),
                     "This ip is already assigned.");
             return new ResponseEntity<>(new ApiResponse(false, "This ip is already assigned."),
                     HttpStatus.BAD_REQUEST);
         }
 
-        LocalDate createDate = LocalDate.now();                                
-        IP serviceIp = ipService.create(serviceIPRequest, currentUser, serviceId, createDate);
+        IP serviceIp = ipService.create(serviceIPRequest, currentUser, serviceId, LocalDate.parse(createDate));
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{ipId}")
@@ -181,24 +182,26 @@ public class TechnicalController {
      * @param customerId the customer unique number who requested the service
      * @param serviceType vps / collocation
      * @param serviceId the unique service number
+     * @param createDate the service create date
      * @param ipId the unique ip number
      * @return OK response or report error
      */
-    @DeleteMapping("/customers/{customerId}/{serviceType}/{serviceId}/ips/{ipId}/delete")
+    @DeleteMapping("/customers/{customerId}/{serviceType}/{serviceId}/{createDate}/ips/{ipId}/delete")
     @PreAuthorize("hasRole('TECHNICAL')")
     public ResponseEntity<?> deleteServiceIP(@CurrentUser UserPrincipal currentUser,
                                              @PathVariable Long customerId,
                                              @PathVariable String serviceType,
                                              @PathVariable Long serviceId,
+                                             @PathVariable String createDate,
                                              @PathVariable Long ipId) {
 
         initialChecking("DELETE_SERVICE_IP", currentUser.getUsername(), customerId,
-                serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId
-                        + ",ipId=" + ipId + "]", "");
+                serviceType, serviceId, LocalDate.parse(createDate), "[customerId=" + customerId + ",serviceId=" + serviceId
+                + ",createDate=" + createDate + ",ipId=" + ipId + "]", "");
 
-        if (!serviceIPRepository.existsByIdAndNetmonServiceId(ipId, serviceId)) {
+        if (!serviceIPRepository.existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(ipId, serviceId, LocalDate.parse(createDate))) {
             logService.createLog("DELETE_SERVICE_IP", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + ipId + "]", "",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ipId=" + ipId + "]", "",
                     "This ip does not exists.");
             return new ResponseEntity<>(new ApiResponse(false, "This ip does not exists."),
                     HttpStatus.BAD_REQUEST);
@@ -223,32 +226,34 @@ public class TechnicalController {
      * @param serviceType vps / collocation
      * @param ipId the unique ip number
      * @param serviceId the unique service number
+     * @param createDate the service create date
      * @return OK response or report error
      */
-    @PutMapping("/customers/{customerId}/{serviceType}/{serviceId}/ips/{ipId}/update")
+    @PutMapping("/customers/{customerId}/{serviceType}/{serviceId}/{createDate}/ips/{ipId}/update")
     @PreAuthorize("hasRole('TECHNICAL')")
     public ResponseEntity<?> updateServiceIP(@Valid @RequestBody ServiceIPRequest serviceIPRequest,
                                              @CurrentUser UserPrincipal currentUser,
                                              @PathVariable Long customerId,
                                              @PathVariable String serviceType,
                                              @PathVariable Long ipId,
-                                             @PathVariable Long serviceId) {
+                                             @PathVariable Long serviceId,
+                                             @PathVariable String createDate) {
 
         initialChecking("UPDATE_SERVICE_IP", currentUser.getUsername(), customerId,
-                serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + ipId + "]",
+                serviceType, serviceId, LocalDate.parse(createDate), "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ipId=" + ipId + "]",
                 serviceIPRequest.toString());
 
-        if (!serviceIPRepository.existsByIdAndNetmonServiceId(ipId, serviceId)) {
+        if (!serviceIPRepository.existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(ipId, serviceId, LocalDate.parse(createDate))) {
             logService.createLog("DELETE_SERVICE_IP", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + ipId + "]",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ipId=" + ipId + "]",
                     serviceIPRequest.toString(), "This ip does not belong to the service.");
             return new ResponseEntity<>(new ApiResponse(false, "This ip does not belong to the service."),
                     HttpStatus.BAD_REQUEST);
         }
 
-        if (serviceIPRepository.existsByIpAndNetmonServiceId(serviceIPRequest.getIp(), serviceId)) {
+        if (serviceIPRepository.existsByIpAndNetmonServiceIdAndNetmonServiceCreateDate(serviceIPRequest.getIp(), serviceId, LocalDate.parse(createDate))) {
             logService.createLog("DELETE_SERVICE_IP", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",ipId=" + ipId + "]",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ipId=" + ipId + "]",
                     serviceIPRequest.toString(), "This ip is already assigned." );
             return new ResponseEntity<>(new ApiResponse(false, "This ip is already assigned."),
                     HttpStatus.BAD_REQUEST);
@@ -313,7 +318,7 @@ public class TechnicalController {
 //                 "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId
 //                         + ",deviceId=" + deviceId + "]", "");
 
-//         if (!colocationDeviceRepository.existsByIdAndNetmonServiceId(deviceId, colocationId)) {
+//         if (!colocationDeviceRepository.existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(deviceId, colocationId)) {
 //             logService.createLog("DELETE_COLOCATION_DEVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
 //                     "[customerId=" + customerId + ",colocationId=" + colocationId + ",deviceId=" + deviceId + "]", "",
 //                     "The device does not exists.");
@@ -352,7 +357,7 @@ public class TechnicalController {
 //                 "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId
 //                         + ",deviceId=" + deviceId + "]", deviceRequest.toString());
 
-//         if (!colocationDeviceRepository.existsByIdAndNetmonServiceId(deviceId, colocationId)) {
+//         if (!colocationDeviceRepository.existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(deviceId, colocationId)) {
 //             logService.createLog("UPDATE_COLOCATION_DEVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
 //                     "[customerId=" + customerId + ",colocationId=" + colocationId + ",deviceId=" + deviceId + "]",
 //                     deviceRequest.toString(), "This device does not belong to the service.");
@@ -391,7 +396,7 @@ public class TechnicalController {
 //                 "colocations", colocationId, "[customerId=" + customerId + ",colocationId=" + colocationId
 //                         + ",deviceId=" + deviceId + "]", deviceStatusRequest.toString());
 
-//         if (!colocationDeviceRepository.existsByIdAndNetmonServiceId(deviceId, colocationId)) {
+//         if (!colocationDeviceRepository.existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(deviceId, colocationId)) {
 //             logService.createLog("CHANGE_COLOCATION_DEVICE_STATUS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
 //                     "[customerId=" + customerId + ",colocationId=" + colocationId + ",deviceId=" + deviceId + "]",
 //                     deviceStatusRequest.toString(), "This device does not belong to the service.");
@@ -455,23 +460,25 @@ public class TechnicalController {
      * @param customerId the customer unique number who requested the service
      * @param serviceType vps / collocation
      * @param serviceId the unique service number
+     * @param createDate the service create date
      * @param portId the unique port number
      * @return OK response or report error
      */
-    @DeleteMapping("/customers/{customerId}/{serviceType}/{serviceId}/ports/{portId}/delete")
+    @DeleteMapping("/customers/{customerId}/{serviceType}/{serviceId}/{createDate}/ports/{portId}/delete")
     @PreAuthorize("hasRole('TECHNICAL')")
     public ResponseEntity<?> deleteServicePort(@CurrentUser UserPrincipal currentUser,
                                                @PathVariable Long customerId,
                                                @PathVariable String serviceType,
                                                @PathVariable Long serviceId,
+                                               @PathVariable String createDate,
                                                @PathVariable Long portId) {
         initialChecking("DELETE_SERVICE_PORT", currentUser.getUsername(), customerId,
-                serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" +
-                        serviceId + ",portId=" + portId + "]", "");
+                serviceType, serviceId, LocalDate.parse(createDate), "[customerId=" + customerId + ",serviceId=" +
+                        serviceId + ",createDate=" + createDate + ",portId=" + portId + "]", "");
 
-        if (!servicePortRepository.existsByIdAndNetmonServiceId(portId, serviceId)) {
+        if (!servicePortRepository.existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(portId, serviceId, LocalDate.parse(createDate))) {
             logService.createLog("DELETE_SERVICE_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",portId=" + portId + "]", "",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",portId=" + portId + "]", "",
                     "This port does not exists.");
             return new ResponseEntity<>(new ApiResponse(false, "This port does not exists."),
                     HttpStatus.BAD_REQUEST);
@@ -510,7 +517,7 @@ public class TechnicalController {
 //                 serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId +
 //                         ",portId=" + portId + "]", servicePortRequest.toString());
 //         LocalDate createDate = LocalDate.now();
-//         if (!servicePortRepository.existsByIdAndNetmonServiceId(portId, serviceId)) {
+//         if (!servicePortRepository.existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(portId, serviceId)) {
 //             logService.createLog("UPDATE_SERVICE_PORT", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
 //                     "[customerId=" + customerId + ",serviceId=" + serviceId + ",portId=" + portId + "]",
 //                     servicePortRequest.toString(), "This port does not belong to the service.");
@@ -543,24 +550,26 @@ public class TechnicalController {
      * @param customerId the customer unique number who requested the service
      * @param serviceType vps / collocation
      * @param serviceId the unique service number
+     * @param createDate the service create date
      * @param ticketId the unique ticket number
      * @return OK response or report error
      */
-    @PostMapping("/customers/{customerId}/{serviceType}/{serviceId}/tickets/{ticketId}/response")
+    @PostMapping("/customers/{customerId}/{serviceType}/{serviceId}/{createDate}/tickets/{ticketId}/response")
     @PreAuthorize("hasRole('TECHNICAL')")
     public ResponseEntity<?> setTicketResponse(@Valid @RequestBody String response,
                                                @CurrentUser UserPrincipal currentUser,
                                                @PathVariable Long customerId,
                                                @PathVariable String serviceType,
                                                @PathVariable Long serviceId,
+                                               @PathVariable String createDate,
                                                @PathVariable Long ticketId) {
         initialChecking("SET_TICKET_RESPONSE", currentUser.getUsername(), customerId,
-                serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + ",ticketId="
+                serviceType, serviceId, LocalDate.parse(createDate), "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ticketId="
                         + ticketId + "]", response);
 
-        if(!serviceTicketRepository.existsByIdAndNetmonServiceId(ticketId, serviceId)) {
+        if(!serviceTicketRepository.existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(ticketId, serviceId, LocalDate.parse(createDate))) {
             logService.createLog("SET_TICKET_RESPONSE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",ticketId=" + ticketId + "]",
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",ticketId=" + ticketId + "]",
                     response, "This ticket does not belong to the service.");
             throw new AccessDeniedException("This ticket does not belong to the service.");
         }
@@ -692,6 +701,7 @@ public class TechnicalController {
      * @param customerId the customer unique number who requested the service
      * @param serviceType vps / colocation
      * @param serviceId the unique service number
+     * @param createDate the service create date
      * @return OK response or report error
      */
     @PutMapping("/customers/{customerId}/{serviceType}/{serviceId}/rename")
@@ -700,16 +710,17 @@ public class TechnicalController {
                                                           @CurrentUser UserPrincipal currentUser,
                                                           @PathVariable Long customerId,
                                                           @PathVariable String serviceType,
-                                                          @PathVariable Long serviceId) {
+                                                          @PathVariable Long serviceId,
+                                                          @PathVariable String createDate) {
 
         initialChecking("RENAME_SERVICE", currentUser.getUsername(), customerId,
-                serviceType, serviceId, "[customerId=" + customerId + ",serviceId=" + serviceId + "]",
+                serviceType, serviceId, LocalDate.parse(createDate), "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]",
                 renameServiceRequest.toString());
 
-        nsService.renameService(currentUser, serviceId, renameServiceRequest);
+        nsService.renameService(currentUser, serviceId, LocalDate.parse(createDate), renameServiceRequest);
 
         URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{serviceId}")
+                .fromCurrentRequest().path("/{serviceId}/{createDate}")
                 .buildAndExpand(serviceId).toUri();
 
         return ResponseEntity.created(location)
@@ -723,10 +734,11 @@ public class TechnicalController {
      * @param customerId the customer unique number who requested the service
      * @param serviceType vps / colocation
      * @param serviceId the unique service number
+     * @param createDate the service create date
      * @param requestParams query parameters of request
      * @param bodyParams body parameters of request
      */
-    private void initialChecking(String action, String username, Long customerId, String serviceType, Long serviceId,
+    private void initialChecking(String action, String username, Long customerId, String serviceType, Long serviceId, LocalDate createDate,
                                  String requestParams, String bodyParams){
 
         if (!userRepository.existsById(customerId)) {
@@ -754,7 +766,7 @@ public class TechnicalController {
         if(serviceType.compareToIgnoreCase("vps") == 0)
             srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId, createDate, companyId, srvType)) {
             logService.createLog(action, username, NetmonStatus.LOG_STATUS.FAILED,
                     requestParams, bodyParams, "This service does not belong to the company.");
             throw new AccessDeniedException("This service does not belong to the company.");

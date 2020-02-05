@@ -21,6 +21,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @RestController
@@ -199,19 +200,21 @@ public class ManagerController {
      * @param customerId the customer unique number who requested the service
      * @param serviceType vps / collocation
      * @param serviceId the unique service number
+     * @param createDate the service create
      * @return OK response or report error
      */
-    @PutMapping("/customers/{customerId}/{serviceType}/{serviceId}/confirm")
+    @PutMapping("/customers/{customerId}/{serviceType}/{serviceId}/{createDate}/confirm")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> confirmService(@Valid @RequestBody ServiceConfirmRequest serviceConfirmRequest,
                                             @CurrentUser UserPrincipal currentUser,
                                             @PathVariable Long customerId,
                                             @PathVariable String serviceType,
-                                            @PathVariable Long serviceId) {
-
+                                            @PathVariable Long serviceId,
+                                            @PathVariable String createDate) {
+        System.out.println(createDate);
         if (!userRepository.existsById(customerId)) {
             logService.createLog("CONFIRM_SERVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + "]", serviceConfirmRequest.toString(),
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]", serviceConfirmRequest.toString(),
                     "The customer does not exists.");
             throw new ResourceNotFoundException("Customer", "customerId", customerId);
         }
@@ -219,7 +222,7 @@ public class ManagerController {
         Optional<Company> companyOptional = companyRepository.findByUserId(customerId);
         if(!companyOptional.isPresent()){
             logService.createLog("UPDATE_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + "]", serviceConfirmRequest.toString(),
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]", serviceConfirmRequest.toString(),
                     "The customer has no company.");
             throw new ResourceNotFoundException("Company", "userId", customerId);
         }
@@ -229,18 +232,18 @@ public class ManagerController {
         if(serviceType.compareToIgnoreCase("vps") == 0)
             srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-        if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId, LocalDate.parse(createDate), companyId, srvType)) {
             logService.createLog("CONFIRM_SERVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-                    "[customerId=" + customerId + ",serviceId=" + serviceId + "]", serviceConfirmRequest.toString(),
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]", serviceConfirmRequest.toString(),
                     "This service does not belong to the company.");
             throw new AccessDeniedException("This service does not belong to the company.");
         }
 
-        nsService.managerConfirmService(currentUser, serviceId, serviceConfirmRequest);
+        nsService.managerConfirmService(currentUser, serviceId, LocalDate.parse(createDate), serviceConfirmRequest);
 
         URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{serviceId}")
-                .buildAndExpand(serviceId).toUri();
+                .fromCurrentRequest().path("/{serviceId}/{createDate}")
+                .buildAndExpand(serviceId, createDate).toUri();
 
         return ResponseEntity.created(location)
                 .body(new ApiResponse(true, "The service updated successfully."));
@@ -287,7 +290,7 @@ public class ManagerController {
 //         if(serviceType.compareToIgnoreCase("vps") == 0)
 //             srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-//         if (!netmonServiceRepository.existsByIdAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
+//         if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
 //             logService.createLog("VOID_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
 //                     "[customerId=" + customerId + ",serviceId=" + serviceId + ",billingId=" + billingId + "]",
 //                     serviceBillingRequest.toString(), "This service does not belong to the company.");

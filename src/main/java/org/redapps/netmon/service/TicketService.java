@@ -69,17 +69,18 @@ public class TicketService {
     /**
      * @param currentUser the user id who currently logged in
      * @param serviceId the unique service number
+     * @param createDate the service create date
      * @param page the page number of the response (default value is 0)
      * @param size the page size of each response (default value is 30)
      * @return ticket responses page by page
      */
     public PagedResponse<ServiceTicketResponse> getServiceTickets(UserPrincipal currentUser,
-                                                                  Long serviceId, int page, int size) {
+                                                                  Long serviceId, LocalDate createDate, int page, int size) {
         validatePageNumberAndSize(page, size);
 
         // find all tickets sorted by createdAt
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        Page<Ticket> serviceTickets = serviceTicketRepository.findAllByNetmonServiceId(serviceId, pageable);
+        Page<Ticket> serviceTickets = serviceTicketRepository.findAllByNetmonServiceId(serviceId, createDate, pageable);
 
         if(serviceTickets.getNumberOfElements() == 0) {
             return new PagedResponse<>(Collections.emptyList(), serviceTickets.getNumber(),
