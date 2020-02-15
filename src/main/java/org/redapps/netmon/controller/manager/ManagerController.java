@@ -2,7 +2,7 @@ package org.redapps.netmon.controller.manager;
 
 import org.redapps.netmon.exception.ResourceNotFoundException;
 import org.redapps.netmon.model.Company;
-import org.redapps.netmon.model.ServiceIdentity;
+import org.redapps.netmon.model.ResourcePrice;
 import org.redapps.netmon.model.VpsPlan;
 import org.redapps.netmon.payload.*;
 import org.redapps.netmon.repository.*;
@@ -35,13 +35,16 @@ public class ManagerController {
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final NSService nsService;
+    private final ResourcePriceRepository resourcePriceRepository;
+    private final ResourcePriceService resourcePriceService;
 //     private final BillingService billingService;
 
     @Autowired
     public ManagerController(LogService logService, NetmonServiceRepository netmonServiceRepository,
                              VpsPlanRepository planRepository, VpsPlanService vpsPlanService,
                              UserRepository userRepository, CompanyRepository companyRepository,
-                             NSService nsService
+                             NSService nsService, ResourcePriceRepository resourcePriceRepository,
+                             ResourcePriceService resourcePriceService
                         //      , BillingService billingService
                              ) {
         this.logService = logService;
@@ -51,6 +54,8 @@ public class ManagerController {
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.nsService = nsService;
+        this.resourcePriceRepository = resourcePriceRepository;
+        this.resourcePriceService = resourcePriceService;
         // this.billingService = billingService;
     }
 
@@ -211,7 +216,6 @@ public class ManagerController {
                                             @PathVariable String serviceType,
                                             @PathVariable Long serviceId,
                                             @PathVariable String createDate) {
-        System.out.println(createDate);
         if (!userRepository.existsById(customerId)) {
             logService.createLog("CONFIRM_SERVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
                     "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + "]", serviceConfirmRequest.toString(),
@@ -306,4 +310,54 @@ public class ManagerController {
 //         return ResponseEntity.created(location)
 //                 .body(new ApiResponse(true, "The billing updated successfully."));
 //     }
+
+    /**
+     * geting a resourcePrice info by id
+     * @param currentUser the user id who currently logged in
+     * @param resourcePriceId the unique resourcePrice number
+     * @return resourcePrice response
+     */
+    @GetMapping("/resourceprice/{resourcePriceId}")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResourcePriceResponse getResourcePriceById(@CurrentUser UserPrincipal currentUser,
+                                       @PathVariable Long resourcePriceId) {
+
+
+        return resourcePriceService.getResourcePriceById(resourcePriceId, currentUser);
+    }
+
+
+
+    /**
+     * creating a new resource price
+     * @param resourcePriceRequest the resourcePrice information object
+     * @param currentUser the user id who currently logged in
+     * @return OK response or report error
+     */
+    @PostMapping("/resourceprice/new")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> createrResourePrice(@Valid @RequestBody ResourcePriceRequest resourcePriceRequest,
+                                           @CurrentUser UserPrincipal currentUser) {
+
+        if (resourcePriceRepository.existsByDate(resourcePriceRequest.getDate())) {
+            logService.createLog("CREATE_RESOURCE_PRICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED, "",
+                    resourcePriceRequest.toString(), "This resource price already exists.");
+            return new ResponseEntity<>(new ApiResponse(false, "This resource price already exists."),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        ResourcePrice resourcePrice = resourcePriceService.create(resourcePriceRequest, currentUser);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest().path("/{resourcePriceId}")
+                .buildAndExpand(resourcePrice.getId()).toUri();
+
+        return ResponseEntity.created(location)
+                .body(new ApiResponse(true, "The resource Price created successfully."));
+    }
+
+
+
+
+
 }

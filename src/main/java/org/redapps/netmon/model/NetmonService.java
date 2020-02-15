@@ -84,6 +84,13 @@ public class NetmonService extends UserDateAudit {
     @JsonIgnore
     private VpsPlan vpsPlan;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "resource_price_id", nullable = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+
+    @JsonIgnore
+    private ResourcePrice resourcePrice;
+
     public NetmonService() {
 
     }
@@ -105,11 +112,12 @@ public class NetmonService extends UserDateAudit {
         this.company = company;
         this.technicalPerson = technicalPerson;
         this.osType = osType;
+        this.createDate = LocalDate.now();
     }
 
     // Create a VPS service
     public NetmonService(String description, String name, NetmonTypes.SERVICE_TYPES serviceType,
-                         int validIp, int invalidIp, boolean vnc, VpsPlan vpsPlan, double extraRam,
+                         int validIp, int invalidIp, boolean vnc, VpsPlan vpsPlan, ResourcePrice resourcePrice, double extraRam,
                          double extraCpu, double extraDisk, double extraTraffic,
                          Long duration, Company company, TechnicalPerson technicalPerson,
                          OSType osType, double price) {
@@ -121,6 +129,7 @@ public class NetmonService extends UserDateAudit {
         this.vnc = vnc;
         this.status = NetmonStatus.ServiceStatus.REQUEST_FOR_NEW_SERVICE;
         this.vpsPlan = vpsPlan;
+        this.resourcePrice = resourcePrice;
         this.extraRam = extraRam;
         this.extraCpu = extraCpu;
         this.extraDisk = extraDisk;
@@ -316,6 +325,14 @@ public class NetmonService extends UserDateAudit {
 
     public void setVpsPlan(VpsPlan vpsPlan) {
         this.vpsPlan = vpsPlan;
+    }
+
+    public ResourcePrice getResourcePrice() {
+        return this.resourcePrice;
+    }
+
+    public void setResourcePrice(ResourcePrice resourcePrice) {
+        this.resourcePrice = resourcePrice;
     }
 
     public Long getDuration() {

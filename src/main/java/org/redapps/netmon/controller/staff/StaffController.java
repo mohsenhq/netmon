@@ -42,6 +42,7 @@ public class StaffController {
     private final LogService logService;
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
+    private final ResourcePriceService resourcePriceService;
     // private final BillingService billingService;
     // private final ServiceBillingRepository serviceBillingRepository;
 
@@ -51,7 +52,7 @@ public class StaffController {
             ServiceIPRepository serviceIPRepository, NSService nsService,
             // DeviceService colocationDeviceService,
             VpsPlanService vpsPlanService, UserManagementService userManagementService, IPService ipService,
-            UserRepository userRepository, CompanyRepository companyRepository‍
+            UserRepository userRepository, CompanyRepository companyRepository‍, ResourcePriceService resourcePriceService
     // BillingService billingService,
     // ServiceBillingRepository serviceBillingRepository
     ) {
@@ -67,6 +68,7 @@ public class StaffController {
         this.ipService = ipService;
         this.userRepository = userRepository;
         this.companyRepository = companyRepository‍;
+        this.resourcePriceService = resourcePriceService;
 
         // this.billingService = billingService;
         // this.serviceBillingRepository = serviceBillingRepository;
@@ -1143,4 +1145,36 @@ public class StaffController {
 
     // return billingService.getLastPaidBilling(serviceId);
     // }
+
+
+    /**
+     * getting list of all resourcePrices.
+     * 
+     * @param currentUser the user id who currently logged in
+     * @param page        the page number of the response (default value is 0)
+     * @param size        the page size of each response (default value is 30)
+     * @return resource price responses page by page
+     */
+    @GetMapping("/resourceprice/all")
+    @PreAuthorize("hasRole('OFFICE') OR hasRole('MANAGER') OR hasRole('CUSTOMER') ")
+    public PagedResponse<ResourcePriceResponse> getResourcePrice(@CurrentUser UserPrincipal currentUser,
+            @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+
+        return resourcePriceService.getResourcePrice(currentUser, page, size);
+    }
+
+     /**
+     * getting list of all resourcePrices.
+     * 
+     * @param currentUser the user id who currently logged in
+     * @param page        the page number of the response (default value is 0)
+     * @param size        the page size of each response (default value is 30)
+     * @return resource price responses page by page
+     */
+    @GetMapping("/resourceprice/last")
+    @PreAuthorize("hasRole('OFFICE') OR hasRole('MANAGER') OR hasRole('CUSTOMER') ")
+    public ResourcePriceResponse getResourcePrices(@CurrentUser UserPrincipal currentUser) {
+        return resourcePriceService.getResourcePriceLast(currentUser);
+    }
 }

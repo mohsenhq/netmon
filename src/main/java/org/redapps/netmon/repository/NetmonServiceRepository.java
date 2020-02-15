@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface NetmonServiceRepository extends JpaRepository<NetmonService, ServiceIdentity> {
 
-    Optional<NetmonService> findById(Long netmonServiceId);
+    Optional<NetmonService> findById(ServiceIdentity serviceIdentity);
 
     Page<NetmonService> findAllByServiceTypeAndCompanyId(NetmonTypes.SERVICE_TYPES serviceType, Long companyId, Pageable pageable);
 

@@ -35,47 +35,47 @@ public class NSService {
         this.netmonServiceRepository = netmonServiceRepository;
     }
 
-//     /**
-//      * @param currentUser the user id who currently logged in
-//      * @param companyId the unique company number
-//      * @param page the page number of the response (default value is 0)
-//      * @param size the page size of each response (default value is 30)
-//      * @return colocation response page by page
-//      */
-//     public PagedResponse<ColocationResponse> getCompanyColocations(UserPrincipal currentUser,
-//                                                                      long companyId, int page, int size) {
-//         validatePageNumberAndSize(page, size);
+    /**
+     * @param currentUser the user id who currently logged in
+     * @param companyId the unique company number
+     * @param page the page number of the response (default value is 0)
+     * @param size the page size of each response (default value is 30)
+     * @return colocation response page by page
+     */
+    public PagedResponse<ColocationResponse> getCompanyColocations(UserPrincipal currentUser,
+                                                                     long companyId, int page, int size) {
+        validatePageNumberAndSize(page, size);
 
-//         // find all colocations by company id
-//         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-//         Page<NetmonService> netmonServicesPage = netmonServiceRepository.findAllByServiceTypeAndCompanyId(
-//                 NetmonTypes.SERVICE_TYPES.COLOCATION, companyId, pageable);
+        // find all colocations by company id
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        Page<NetmonService> netmonServicesPage = netmonServiceRepository.findAllByServiceTypeAndCompanyId(
+                NetmonTypes.SERVICE_TYPES.COLOCATION, companyId, pageable);
 
-//         if (netmonServicesPage.getNumberOfElements() == 0) {
-//             return new PagedResponse<>(Collections.emptyList(), netmonServicesPage.getNumber(),
-//                     netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(), netmonServicesPage.isLast());
-//         }
+        if (netmonServicesPage.getNumberOfElements() == 0) {
+            return new PagedResponse<>(Collections.emptyList(), netmonServicesPage.getNumber(),
+                    netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(), netmonServicesPage.isLast());
+        }
 
-//         // store colocations into a list
-//         Vector<ColocationResponse> colocationResponses = new Vector<>(10);
-//         ColocationResponse colocationResponse;
-//         for (NetmonService netmonService : netmonServicesPage) {
-//             colocationResponse = new ColocationResponse(netmonService.getId(), netmonService.getName(),
-//                     netmonService.getUnitNumber(), netmonService.getSlaType(),
-//                     netmonService.getDescription(), netmonService.getValidIp(), netmonService.getInvalidIp(),
-//                     netmonService.getStatus(), netmonService.getUsageType(), netmonService.getRackPosition(),
-//                     netmonService.getOsType().getId(), netmonService.getStartDate(), netmonService.getDuration(),
-//                     netmonService.getDiscountPercent());
+        // store colocations into a list
+        Vector<ColocationResponse> colocationResponses = new Vector<>(10);
+        ColocationResponse colocationResponse;
+        for (NetmonService netmonService : netmonServicesPage) {
+            colocationResponse = new ColocationResponse(netmonService.getId(),netmonService.getCreateDate(), netmonService.getName(),
+                    netmonService.getUnitNumber(), netmonService.getSlaType(),
+                    netmonService.getDescription(), netmonService.getValidIp(), netmonService.getInvalidIp(),
+                    netmonService.getStatus(), netmonService.getUsageType(), netmonService.getRackPosition(),
+                    netmonService.getOsType().getId(), netmonService.getStartDate(), netmonService.getDuration(),
+                    netmonService.getDiscountPercent());
 
-//             colocationResponses.add(colocationResponse);
-//         }
+            colocationResponses.add(colocationResponse);
+        }
 
-//         logService.createLog("GET_ALL_COLOCATIONS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
-//                 "[companyId=" + companyId + "]", "", "");
+        logService.createLog("GET_ALL_COLOCATIONS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
+                "[companyId=" + companyId + "]", "", "");
 
-//         return new PagedResponse<>(colocationResponses, netmonServicesPage.getNumber(),
-//                 netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(), netmonServicesPage.isLast());
-//     }
+        return new PagedResponse<>(colocationResponses, netmonServicesPage.getNumber(),
+                netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(), netmonServicesPage.isLast());
+    }
 
 //     /**
 //      * @param currentUser the user id who currently logged in
@@ -117,60 +117,60 @@ public class NSService {
 //                 netmonServicesPage.isLast());
 //     }
 
-//     /**
-//      * @param currentUser the user id who currently logged in
-//      * @param colocationRequest the document information object
-//      * @param company the company information object
-//      * @param technicalPerson the technicalPerson information object
-//      * @param osType the osType information object
-//      * @return service
-//      */
-//     public NetmonService createColocation(UserPrincipal currentUser, ColocationRequest colocationRequest,
-//                                            Company company, TechnicalPerson technicalPerson, OSType osType) {
+    /**
+     * @param currentUser the user id who currently logged in
+     * @param colocationRequest the document information object
+     * @param company the company information object
+     * @param technicalPerson the technicalPerson information object
+     * @param osType the osType information object
+     * @return service
+     */
+    public NetmonService createColocation(UserPrincipal currentUser, ColocationRequest colocationRequest,
+                                           Company company, TechnicalPerson technicalPerson, OSType osType) {
 
-//         // create a new service object
-//         NetmonService netmonService = new NetmonService(colocationRequest.getSlaType(),
-//                 colocationRequest.getDescription(),
-//                 colocationRequest.getName(),
-//                 NetmonTypes.SERVICE_TYPES.COLOCATION, colocationRequest.getUnitNumber(),
-//                 colocationRequest.getValidIp(), colocationRequest.getInvalidIp(), colocationRequest.getStartDate(),
-//                 colocationRequest.getDuration(), company, technicalPerson, osType);
+        // create a new service object
+        NetmonService netmonService = new NetmonService(colocationRequest.getSlaType(),
+                colocationRequest.getDescription(),
+                colocationRequest.getName(),
+                NetmonTypes.SERVICE_TYPES.COLOCATION, colocationRequest.getUnitNumber(),
+                colocationRequest.getValidIp(), colocationRequest.getInvalidIp(), colocationRequest.getStartDate(),
+                colocationRequest.getDuration(), company, technicalPerson, osType);
 
-//         logService.createLog("CREATE_COLOCATION", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
-//                 "[companyId=" + company.getId() + "]", colocationRequest.toString(), "");
+        logService.createLog("CREATE_COLOCATION", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
+                "[companyId=" + company.getId() + "]", colocationRequest.toString(), "");
 
-//         // store the object
-//         return netmonServiceRepository.save(netmonService);
-//     }
+        // store the object
+        return netmonServiceRepository.save(netmonService);
+    }
 
-//     /**
-//      * @param colocationId the unique colocation number
-//      * @param currentUser the user id who currently logged in
-//      * @return colocation response
-//      */
-//     public ColocationResponse getColocationById(Long colocationId, UserPrincipal currentUser) {
+    /**
+     * @param colocationId the unique colocation number
+     * @param currentUser the user id who currently logged in
+     * @return colocation response
+     */
+    public ColocationResponse getColocationById(Long colocationId, LocalDate createDate, UserPrincipal currentUser) {
 
-//         // find the colocation by id
-//         Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(colocationId);
-//         if (!netmonServiceOptional.isPresent()) {
-//             logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-//                     "[colocationId=" + colocationId + "]", "", "The colocation does not exists.");
-//             throw new ResourceNotFoundException("colocation", "colocationId", colocationId);
-//         }
+        // find the colocation by id
+        Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(new ServiceIdentity(colocationId, createDate));
+        if (!netmonServiceOptional.isPresent()) {
+            logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "[colocationId=" + colocationId + ",createDate=" + createDate + "]", "", "The colocation does not exists.");
+            throw new ResourceNotFoundException("colocation", "colocationId", colocationId);
+        }
 
-//         logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
-//                 "[colocationId=" + colocationId + "]", "", "");
+        logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
+                "[colocationId=" + colocationId + ",createDate=" + createDate + "]", "", "");
 
-//         NetmonService netmonService = netmonServiceOptional.get();
+        NetmonService netmonService = netmonServiceOptional.get();
 
-//         // create a new colocation response object
-//         return new ColocationResponse(netmonService.getId(), netmonService.getName(),
-//                 netmonService.getUnitNumber(), netmonService.getSlaType(),
-//                 netmonService.getDescription(), netmonService.getValidIp(), netmonService.getInvalidIp(),
-//                 netmonService.getStatus(), netmonService.getUsageType(),
-//                 netmonService.getRackPosition(), netmonService.getOsType().getId(),
-//                 netmonService.getStartDate(), netmonService.getDuration(), netmonService.getDiscountPercent());
-//     }
+        // create a new colocation response object
+        return new ColocationResponse(netmonService.getId(),netmonService.getCreateDate() , netmonService.getName(),
+                netmonService.getUnitNumber(), netmonService.getSlaType(),
+                netmonService.getDescription(), netmonService.getValidIp(), netmonService.getInvalidIp(),
+                netmonService.getStatus(), netmonService.getUsageType(),
+                netmonService.getRackPosition(), netmonService.getOsType().getId(),
+                netmonService.getStartDate(), netmonService.getDuration(), netmonService.getDiscountPercent());
+    }
 
     /**
      * @param currentUser the user id who currently logged in
@@ -182,15 +182,16 @@ public class NSService {
      * @return service
      */
     public NetmonService createVPS(UserPrincipal currentUser, VpsRequest vpsRequest, Company company,
-                                   TechnicalPerson technicalPerson, OSType osType, VpsPlan vpsPlan) {
-
+                                   TechnicalPerson technicalPerson, OSType osType, VpsPlan vpsPlan, ResourcePrice resourcePrice) {
+        double price = vpsPlan.getMonthlyPrice() + resourcePrice.getCpuPrice() * vpsRequest.getExtraCpu()
+                        + resourcePrice.getRamPrice() * vpsRequest.getExtraRam()
+                        + resourcePrice.getDiskPrice() * vpsRequest.getExtraDisk();
         // create a new vps service
         NetmonService netmonService = new NetmonService(vpsRequest.getDescription(),
                 vpsRequest.getName(), NetmonTypes.SERVICE_TYPES.VPS,
-                vpsRequest.getValidIp(), vpsRequest.getInvalidIp(), vpsRequest.isVnc(), vpsPlan,
+                vpsRequest.getValidIp(), vpsRequest.getInvalidIp(), vpsRequest.isVnc(), vpsPlan, resourcePrice,
                 vpsRequest.getExtraRam(), vpsRequest.getExtraCpu(), vpsRequest.getExtraDisk(),
-                vpsRequest.getExtraTraffic(), vpsRequest.getDuration(), company, technicalPerson, osType,
-                vpsPlan.getMonthlyPrice());
+                vpsRequest.getExtraTraffic(), vpsRequest.getDuration(), company, technicalPerson, osType, price);
 
         logService.createLog("CREATE_VPS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
                 "", vpsRequest.toString(), "");
@@ -297,7 +298,7 @@ public class NSService {
     public VpsResponse getVPSById(Long vpsId, LocalDate createDate, UserPrincipal currentUser) {
 
         // find the service by id
-        Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(vpsId);
+        Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(new ServiceIdentity(vpsId, createDate));
         if (!netmonServiceOptional.isPresent()) {
             logService.createLog("GET_VPS_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
                     "[vpsId=" + vpsId + ",createDate=" + createDate + "]", "", "This VPS does not exists.");
@@ -329,8 +330,8 @@ public class NSService {
     public NetmonService managerConfirmService(UserPrincipal currentUser, Long serviceId, LocalDate createDate,
                                                ServiceConfirmRequest serviceConfirmRequest) {
 
-        // find the service by id
-        Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(serviceId);
+        // find the service by id and create date 
+        Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(new ServiceIdentity(serviceId, createDate));
         if (!netmonServiceOptional.isPresent()) {
             logService.createLog("CONFIRM_SERVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
                     "[serviceId=" + serviceId + "]", serviceConfirmRequest.toString(), "This service does not exists.");
@@ -370,7 +371,7 @@ public class NSService {
                                                 ServiceConfirmRequest serviceConfirmRequest) {
 
         // find the service by id
-        Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(serviceId);
+        Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(new ServiceIdentity(serviceId, createDate));
         if (!netmonServiceOptional.isPresent()) {
             logService.createLog("CONFIRM_SERVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
                     "[serviceId=" + serviceId + "]", serviceConfirmRequest.toString(), "This service does not exists.");
@@ -403,7 +404,7 @@ public class NSService {
                                        RenameServiceRequest renameServiceRequest) {
 
         // find a service by id
-        Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(serviceId);
+        Optional<NetmonService> netmonServiceOptional = netmonServiceRepository.findById(new ServiceIdentity(serviceId, createDate));
         if (!netmonServiceOptional.isPresent()) {
             logService.createLog("RENAME_SERVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
                     "[serviceId=" + serviceId + "]", renameServiceRequest.toString(), "This servicedoes not exists.");

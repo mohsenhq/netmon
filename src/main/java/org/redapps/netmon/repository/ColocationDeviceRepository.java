@@ -1,24 +1,25 @@
-// package org.redapps.netmon.repository;
+package org.redapps.netmon.repository;
 
-// import org.redapps.netmon.model.Device;
-// import org.redapps.netmon.model.ServiceIdentity;
-// import org.springframework.data.domain.Page;
-// import org.springframework.data.domain.Pageable;
-// import org.springframework.data.jpa.repository.JpaRepository;
-// import org.springframework.stereotype.Repository;
+import org.redapps.netmon.model.Device;
+import org.redapps.netmon.model.ServiceIdentity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-// import java.util.List;
-// import java.util.Optional;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
-// @Repository
-// public interface ColocationDeviceRepository extends JpaRepository<Device, Long> {
-//     Optional<Device> findById(Long deviceId);
+@Repository
+public interface ColocationDeviceRepository extends JpaRepository<Device, Long> {
+    Optional<Device> findById(Long deviceId);
 
-//     Page<Device> findAllByNetmonServiceId(Long colocationId, Pageable pageable);
+    Page<Device> findAllByNetmonServiceIdAndNetmonServiceCreateDate(Long colocationId, LocalDate createDate, Pageable pageable);
 
-//     List<Device> findAllByNetmonServiceId(Long colocationId);
+    List<Device> findAllByNetmonServiceIdAndNetmonServiceCreateDate(Long colocationId, LocalDate createDate);
 
-//     boolean existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(Long deviceId, Long colocationId);
+    boolean existsByIdAndNetmonServiceIdAndNetmonServiceCreateDate(Long deviceId, Long colocationId, LocalDate createDate);
 
 
-// }
+}

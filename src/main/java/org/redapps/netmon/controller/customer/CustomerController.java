@@ -34,7 +34,7 @@ import java.util.Vector;
 public class CustomerController {
 
     private final NSService nsService;
-//     private final DeviceService colocationDeviceService;
+    private final DeviceService colocationDeviceService;
     private final IPService ipService;
     private final PortService portService;
     private final TechnicalPersonService technicalPersonService;
@@ -55,10 +55,11 @@ public class CustomerController {
     private final VpsPlanService vpsPlanService;
     private final UserManagementService userManagementService;
     private final UserRepository userRepository;
+    private final ResourcePriceRepository resourcePriceRepository;
 
     @Autowired
     public CustomerController(TechnicalPersonRepository technicalPersonRepository,
-                        //       DeviceService colocationDeviceService, 
+                              DeviceService colocationDeviceService, 
                               OSTypeService osTypeService,
                               TechnicalPersonService technicalPersonService,
                               OsTypeRepository osTypeRepository, DocumentService documentService,
@@ -72,9 +73,10 @@ public class CustomerController {
                               ServiceBillingRepository serviceBillingRepository,
                               VpsPlanService vpsPlanService,
                               UserManagementService userManagementService,
-                              UserRepository userRepository) {
+                              UserRepository userRepository,
+                              ResourcePriceRepository resourcePriceRepository) {
         this.technicalPersonRepository = technicalPersonRepository;
-        // this.colocationDeviceService = colocationDeviceService;
+        this.colocationDeviceService = colocationDeviceService;
         this.technicalPersonService = technicalPersonService;
         this.osTypeRepository = osTypeRepository;
         this.documentService = documentService;
@@ -95,6 +97,7 @@ public class CustomerController {
         this.vpsPlanService = vpsPlanService;
         this.userManagementService = userManagementService;
         this.userRepository = userRepository;
+        this.resourcePriceRepository = resourcePriceRepository;
     }
 
     /**
@@ -345,107 +348,109 @@ public class CustomerController {
 
     }
 
-//     /**
-//      * create a new colocation
-//      * @param colocationRequest the document information object
-//      * @param currentUser the user id who currently logged in
-//      * @return OK response or report error
-//      */
-//     @PostMapping("/colocations/new")
-//     @PreAuthorize("hasRole('CUSTOMER')")
-//     public ResponseEntity<?> createColocation(@Valid @RequestBody ColocationRequest colocationRequest,
-//                                                @CurrentUser UserPrincipal currentUser) {
+    /**
+     * create a new colocation
+     * @param colocationRequest the document information object
+     * @param currentUser the user id who currently logged in
+     * @return OK response or report error
+     */
+    @PostMapping("/colocations/new")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> createColocation(@Valid @RequestBody ColocationRequest colocationRequest,
+                                               @CurrentUser UserPrincipal currentUser) {
 
-//         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-//         if(!companyOptional.isPresent()){
-//             logService.createLog("CREATE_COLOCATION", currentUser.getUsername(),
-//                     NetmonStatus.LOG_STATUS.FAILED,
-//                     "", colocationRequest.toString(), "The customer has no company.");
-//             throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-//         }
+        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+        if(!companyOptional.isPresent()){
+            logService.createLog("CREATE_COLOCATION", currentUser.getUsername(),
+                    NetmonStatus.LOG_STATUS.FAILED,
+                    "", colocationRequest.toString(), "The customer has no company.");
+            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+        }
 
-//         Optional<TechnicalPerson> technicalPersonOptional = technicalPersonRepository.findByIdAndUserId(
-//                 colocationRequest.getTechnicalPersonId(), currentUser.getId());
-//         if (!technicalPersonOptional.isPresent()) {
-//             logService.createLog("CREATE_COLOCATION", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-//                     "", colocationRequest.toString(),
-//                     "The technical person does not exists.");
-//             throw new BadRequestException("The technical person does not exists.");
-//         }
+        Optional<TechnicalPerson> technicalPersonOptional = technicalPersonRepository.findByIdAndUserId(
+                colocationRequest.getTechnicalPersonId(), currentUser.getId());
+        if (!technicalPersonOptional.isPresent()) {
+            logService.createLog("CREATE_COLOCATION", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "", colocationRequest.toString(),
+                    "The technical person does not exists.");
+            throw new BadRequestException("The technical person does not exists.");
+        }
 
-//         Optional<OSType> osTypeOptional = osTypeRepository.findById(colocationRequest.getOsTypeId());
-//         if (!osTypeOptional.isPresent()) {
-//             logService.createLog("CREATE_COLOCATION", currentUser.getUsername(),
-//                     NetmonStatus.LOG_STATUS.FAILED, "", colocationRequest.toString(),
-//                     "The os type does not exists.");
-//             throw new BadRequestException("The os type does not exists.");
-//         }
+        Optional<OSType> osTypeOptional = osTypeRepository.findById(colocationRequest.getOsTypeId());
+        if (!osTypeOptional.isPresent()) {
+            logService.createLog("CREATE_COLOCATION", currentUser.getUsername(),
+                    NetmonStatus.LOG_STATUS.FAILED, "", colocationRequest.toString(),
+                    "The os type does not exists.");
+            throw new BadRequestException("The os type does not exists.");
+        }
 
-//         NetmonService netmonService = nsService.createColocation(currentUser, colocationRequest,
-//                 companyOptional.get(), technicalPersonOptional.get(), osTypeOptional.get());
+        NetmonService netmonService = nsService.createColocation(currentUser, colocationRequest,
+                companyOptional.get(), technicalPersonOptional.get(), osTypeOptional.get());
 
-//         URI location = ServletUriComponentsBuilder
-//                 .fromCurrentRequest().path("/{colocationId}")
-//                 .buildAndExpand(netmonService.getId()).toUri();
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest().path("/{colocationId}")
+                .buildAndExpand(netmonService.getId()).toUri();
 
-//         return ResponseEntity.created(location)
-//                 .body(new ApiResponse(true, "The colocation created successfully."));
-//     }
+        return ResponseEntity.created(location)
+                .body(new ApiResponse(true, "The colocation created successfully."));
+    }
 
-//     /**
-//      * getting list of all user colocations
-//      * @param currentUser the user id who currently logged in
-//      * @param page the page number of the response (default value is 0)
-//      * @param size the page size of each response (default value is 30)
-//      * @return colocation responses page by page
-//      */
-//     @GetMapping("/colocations/all")
-//     @PreAuthorize("hasRole('CUSTOMER')")
-//     public PagedResponse<ColocationResponse> getCompanyColocations(@CurrentUser UserPrincipal currentUser,
-//                                                                      @RequestParam(value = "page",
-//                                                                              defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-//                                                                      @RequestParam(value = "size",
-//                                                                              defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
-//         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-//         if(!companyOptional.isPresent()){
-//             logService.createLog("GET_ALL_COLOCATIONS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-//                     "", "", "The customer has no company.");
-//             throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-//         }
-//         Long companyId = companyOptional.get().getId();
+    /**
+     * getting list of all user colocations
+     * @param currentUser the user id who currently logged in
+     * @param page the page number of the response (default value is 0)
+     * @param size the page size of each response (default value is 30)
+     * @return colocation responses page by page
+     */
+    @GetMapping("/colocations/all")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public PagedResponse<ColocationResponse> getCompanyColocations(@CurrentUser UserPrincipal currentUser,
+                                                                     @RequestParam(value = "page",
+                                                                             defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+                                                                     @RequestParam(value = "size",
+                                                                             defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+        if(!companyOptional.isPresent()){
+            logService.createLog("GET_ALL_COLOCATIONS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "", "", "The customer has no company.");
+            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+        }
+        Long companyId = companyOptional.get().getId();
 
-//         return nsService.getCompanyColocations(currentUser, companyId, page, size);
-//     }
+        return nsService.getCompanyColocations(currentUser, companyId, page, size);
+    }
 
-//     /**
-//      * getting a colocation info by id
-//      * @param currentUser the user id who currently logged in
-//      * @param colocationId the unique colocation number
-//      * @return colocation response
-//      */
-//     @GetMapping("/colocations/{colocationId}")
-//     @PreAuthorize("hasRole('CUSTOMER')")
-//     public ColocationResponse getColocationById(@CurrentUser UserPrincipal currentUser,
-//                                                   @PathVariable Long colocationId) {
+    /**
+     * getting a colocation info by id
+     * @param currentUser the user id who currently logged in
+     * @param colocationId the unique colocation number
+     * @param createDate the service create date
+     * @return colocation response
+     */
+    @GetMapping("/colocations/{colocationId}/{createDate}")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ColocationResponse getColocationById(@CurrentUser UserPrincipal currentUser,
+                                                  @PathVariable Long colocationId,
+                                                  @PathVariable String createDate) {
 
-//         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-//         if(!companyOptional.isPresent()){
-//             logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-//                     "[colocationId=" + colocationId + "]", "", "The customer has no company.");
-//             throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-//         }
-//         Long companyId = companyOptional.get().getId();
+        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+        if(!companyOptional.isPresent()){
+            logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "[colocationId=" + colocationId + ",createDate=" + createDate + "]", "", "The customer has no company.");
+            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+        }
+        Long companyId = companyOptional.get().getId();
 
-//         if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(colocationId, companyId,
-//                 NetmonTypes.SERVICE_TYPES.COLOCATION)) {
-//             logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-//                     "[colocationId=" + colocationId + "]", "",
-//                     "This service does not belong to the company.");
-//             throw new AccessDeniedException("This service does not belong to the company.");
-//         }
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(colocationId, LocalDate.parse(createDate), companyId,
+                NetmonTypes.SERVICE_TYPES.COLOCATION)) {
+            logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "[colocationId=" + colocationId + ",createDate=" + createDate + "]", "",
+                    "This service does not belong to the company.");
+            throw new AccessDeniedException("This service does not belong to the company.");
+        }
 
-//         return nsService.getColocationById(colocationId, currentUser);
-//     }
+        return nsService.getColocationById(colocationId, LocalDate.parse(createDate), currentUser);
+    }
 
 //     /**
 //      * create a new device
@@ -1439,8 +1444,16 @@ public class CustomerController {
             throw new AccessDeniedException("The vps plan is not active.");
         }
 
+        if (!resourcePriceRepository.existsTopByOrderByDateDesc()) {
+                logService.createLog("CREATE_VPS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                        "", vpsRequest.toString(), "This resourcePrice does not exists.");
+                throw new BadRequestException("This resourcePrice does not exists.");
+            }
+        ResourcePrice resourcePrice = resourcePriceRepository.findTopByOrderByDateDesc();
+        
+
         NetmonService netmonService = nsService.createVPS(currentUser, vpsRequest, companyOptional.get(),
-                technicalPersonOptional.get(), osType, vpsPlan);
+                technicalPersonOptional.get(), osType, vpsPlan, resourcePrice);
 
         int[] ports = vpsRequest.getPorts();
         for (int port : ports) {
