@@ -2,6 +2,8 @@ package org.redapps.netmon.controller.manager;
 
 import org.redapps.netmon.exception.ResourceNotFoundException;
 import org.redapps.netmon.model.Company;
+import org.redapps.netmon.model.PlanPrice;
+import org.redapps.netmon.model.PlanPriceId;
 import org.redapps.netmon.model.ResourcePrice;
 import org.redapps.netmon.model.VpsPlan;
 import org.redapps.netmon.payload.*;
@@ -23,6 +25,7 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.Optional;
+import org.redapps.netmon.util.AppConstants;
 
 @RestController
 @RequestMapping("/api/manager")
@@ -36,17 +39,19 @@ public class ManagerController {
     private final CompanyRepository companyRepository;
     private final NSService nsService;
     private final ResourcePriceRepository resourcePriceRepository;
+    private final PlanPriceRepository planPriceRepository;
+    private final PlanPriceService planPriceService;
     private final ResourcePriceService resourcePriceService;
 //     private final BillingService billingService;
 
     @Autowired
-    public ManagerController(LogService logService, NetmonServiceRepository netmonServiceRepository,
-                             VpsPlanRepository planRepository, VpsPlanService vpsPlanService,
-                             UserRepository userRepository, CompanyRepository companyRepository,
-                             NSService nsService, ResourcePriceRepository resourcePriceRepository,
-                             ResourcePriceService resourcePriceService
-                        //      , BillingService billingService
-                             ) {
+        public ManagerController(LogService logService, NetmonServiceRepository netmonServiceRepository,
+                        VpsPlanRepository planRepository, VpsPlanService vpsPlanService, UserRepository userRepository,
+                        CompanyRepository companyRepository, NSService nsService,
+                        ResourcePriceRepository resourcePriceRepository, ResourcePriceService resourcePriceService,
+                        PlanPriceRepository planPriceRepository, PlanPriceService planPriceService
+                        // , BillingService billingService
+        ) {
         this.logService = logService;
         this.netmonServiceRepository = netmonServiceRepository;
         this.vpsPlanRepository = planRepository;
@@ -56,6 +61,8 @@ public class ManagerController {
         this.nsService = nsService;
         this.resourcePriceRepository = resourcePriceRepository;
         this.resourcePriceService = resourcePriceService;
+        this.planPriceRepository = planPriceRepository;
+        this.planPriceService = planPriceService;
         // this.billingService = billingService;
     }
 
@@ -355,9 +362,68 @@ public class ManagerController {
         return ResponseEntity.created(location)
                 .body(new ApiResponse(true, "The resource Price created successfully."));
     }
+       
+        /**
+         * creating a new plan price
+         * 
+         * @param planPriceRequest the planPrice information object
+         * @param currentUser      the user id who currently logged in
+         * @param planId           the plan id
+         * @return OK response or report error
+         */
+        @PostMapping("/plan/{planId}/price/new")
+        @PreAuthorize("hasRole('MANAGER')")
+        public ResponseEntity<?> createPlanPrice(@Valid @RequestBody PlanPriceRequest planPriceRequest,
+                        @PathVariable Long planId, @CurrentUser UserPrincipal currentUser) {
 
+                if (planPriceRepository.existsById(new PlanPriceId(planId, planPriceRequest.getDate()))) {
+                        logService.createLog("CREATE_PLAN_PRICE", currentUser.getUsername(),
+                                        NetmonStatus.LOG_STATUS.FAILED, "", planPriceRequest.toString(),
+                                        "This plan price already exists.");
+                        return new ResponseEntity<>(new ApiResponse(false, "This plan price already exists."),
+                                        HttpStatus.BAD_REQUEST);
+                }
 
+                VpsPlan plan = vpsPlanRepository.findById(planId).get();
+                PlanPrice planPrice = planPriceService.create(plan, planPriceRequest, currentUser);
 
+                URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{planPriceId}")
+                                .buildAndExpand(planPrice.getPlanId()).toUri();
+
+                return ResponseEntity.created(location)
+                                .body(new ApiResponse(true, "The plan Price created successfully."));
+        }
+
+        /**
+         * geting a resourcePrices info by plan id
+         * 
+         * @param currentUser     the user id who currently logged in
+         * @param resourcePriceId the unique resourcePrice number
+         * @param page            the page number of the response (default value is 0)
+         * @param size            the page size of each response (default value is 30)
+         * @return resourcePrice response
+         */
+        @GetMapping("/plan/{planId}/planprices")
+        @PreAuthorize("hasRole('MANAGER')")
+        public PagedResponse<PlanPriceResponse> getPlanPriceByPlanId(@CurrentUser UserPrincipal currentUser,
+                        @PathVariable Long planId,
+                        @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+                        @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+
+                // find plan by id
+                Optional<VpsPlan> vpsPlanOptional = vpsPlanRepository.findById(planId);
+                if (!vpsPlanOptional.isPresent()) {
+                        logService.createLog("(IN)Get_VPS_PLAN_PLAN_PRICE_ALL", currentUser.getUsername(),
+                                        NetmonStatus.LOG_STATUS.FAILED, "[planId=" + planId + "]", "",
+                                        "The vps plan does not exists.");
+                        throw new ResourceNotFoundException("VpsPlan", "vpsPlanId", planId);
+                }
+                logService.createLog("(IN)Get_VPS_PLAN_PLAN_PRICE_ALL", currentUser.getUsername(),
+                                NetmonStatus.LOG_STATUS.SUCCESS, "[planId=" + planId + "]", "", "");
+
+                VpsPlan vpsPlan = vpsPlanOptional.get();
+                return planPriceService.getPlanPriceVpsByVpsPlan(vpsPlan, currentUser, page, size);
+        }
 
 
 }

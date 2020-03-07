@@ -125,11 +125,11 @@ public class NSService {
      * @param osType the osType information object
      * @return service
      */
-    public NetmonService createColocation(UserPrincipal currentUser, ColocationRequest colocationRequest,
+    public NetmonService createColocation(UserPrincipal currentUser, Long colocationId, ColocationRequest colocationRequest,
                                            Company company, TechnicalPerson technicalPerson, OSType osType) {
 
         // create a new service object
-        NetmonService netmonService = new NetmonService(colocationRequest.getSlaType(),
+        NetmonService netmonService = new NetmonService(colocationId, colocationRequest.getSlaType(),
                 colocationRequest.getDescription(),
                 colocationRequest.getName(),
                 NetmonTypes.SERVICE_TYPES.COLOCATION, colocationRequest.getUnitNumber(),
@@ -181,13 +181,13 @@ public class NSService {
      * @param vpsPlan the vpsPlan information object
      * @return service
      */
-    public NetmonService createVPS(UserPrincipal currentUser, VpsRequest vpsRequest, Company company,
+    public NetmonService createVPS(UserPrincipal currentUser, Long vpsId, VpsRequest vpsRequest, Company company,
                                    TechnicalPerson technicalPerson, OSType osType, VpsPlan vpsPlan, ResourcePrice resourcePrice) {
         double price = vpsPlan.getMonthlyPrice() + resourcePrice.getCpuPrice() * vpsRequest.getExtraCpu()
                         + resourcePrice.getRamPrice() * vpsRequest.getExtraRam()
                         + resourcePrice.getDiskPrice() * vpsRequest.getExtraDisk();
         // create a new vps service
-        NetmonService netmonService = new NetmonService(vpsRequest.getDescription(),
+        NetmonService netmonService = new NetmonService(vpsId, vpsRequest.getDescription(),
                 vpsRequest.getName(), NetmonTypes.SERVICE_TYPES.VPS,
                 vpsRequest.getValidIp(), vpsRequest.getInvalidIp(), vpsRequest.isVnc(), vpsPlan, resourcePrice,
                 vpsRequest.getExtraRam(), vpsRequest.getExtraCpu(), vpsRequest.getExtraDisk(),
@@ -197,6 +197,34 @@ public class NSService {
                 "", vpsRequest.toString(), "");
         return netmonServiceRepository.save(netmonService);
     }
+
+    /**
+     * @param currentUser the user id who currently logged in
+     * @param vpsRequest the vps information object
+     * @param company the company information object
+     * @param technicalPerson the technicalPerson information object
+     * @param osType the osType information object
+     * @param vpsPlan the vpsPlan information object
+     * @return service
+     */
+    public NetmonService reNewVPS(UserPrincipal currentUser, String name, Long vpsId, VpsRequest vpsRequest, Company company,
+                                   TechnicalPerson technicalPerson, OSType osType, VpsPlan vpsPlan, ResourcePrice resourcePrice) {
+        double price = vpsPlan.getMonthlyPrice() + resourcePrice.getCpuPrice() * vpsRequest.getExtraCpu()
+                        + resourcePrice.getRamPrice() * vpsRequest.getExtraRam()
+                        + resourcePrice.getDiskPrice() * vpsRequest.getExtraDisk();
+                
+        // create a new vps service
+        NetmonService netmonService = new NetmonService(vpsId, vpsRequest.getDescription(),
+                name, NetmonTypes.SERVICE_TYPES.VPS,
+                vpsRequest.getValidIp(), vpsRequest.getInvalidIp(), vpsRequest.isVnc(), vpsPlan, resourcePrice,
+                vpsRequest.getExtraRam(), vpsRequest.getExtraCpu(), vpsRequest.getExtraDisk(),
+                vpsRequest.getExtraTraffic(), vpsRequest.getDuration(), company, technicalPerson, osType, price, true);
+
+        logService.createLog("CREATE_VPS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS,
+                "", vpsRequest.toString(), "");
+        return netmonServiceRepository.save(netmonService);
+    }
+
 
     /**
      * @param currentUser the user id who currently logged in

@@ -704,7 +704,7 @@ public class TechnicalController {
      * @param createDate the service create date
      * @return OK response or report error
      */
-    @PutMapping("/customers/{customerId}/{serviceType}/{serviceId}/rename")
+    @PutMapping("/customers/{customerId}/{serviceType}/{serviceId}/{createDate}/rename")
     @PreAuthorize("hasRole('TECHNICAL')")
     public ResponseEntity<?> renameService(@Valid @RequestBody RenameServiceRequest renameServiceRequest,
                                                           @CurrentUser UserPrincipal currentUser,
@@ -721,7 +721,7 @@ public class TechnicalController {
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{serviceId}/{createDate}")
-                .buildAndExpand(serviceId).toUri();
+                .buildAndExpand(serviceId, createDate).toUri();
 
         return ResponseEntity.created(location)
                 .body(new ApiResponse(true, "The service renamed successfully."));

@@ -15,7 +15,8 @@ public class NetmonStatus {
         ACCEPTED_BY_CUSTOMER,
         REJECTED_BY_CUSTOMER,
         RUNNING,
-        DISABLE
+        DISABLE,
+        REQUEST_FOR_RENEW_SERVICE
     }
 
     public enum DEVICE_STATUS{

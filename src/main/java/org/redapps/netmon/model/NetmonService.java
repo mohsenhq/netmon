@@ -17,7 +17,7 @@ import java.time.LocalDate;
 public class NetmonService extends UserDateAudit {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    // @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @Id
@@ -52,6 +52,9 @@ public class NetmonService extends UserDateAudit {
 
     @Column(name = "START_DATE")
     private LocalDate startDate;
+
+    @Column(name = "TERMINATE_DATE")
+    private LocalDate terminateDate;
 
     private Long duration;
 
@@ -96,9 +99,10 @@ public class NetmonService extends UserDateAudit {
     }
 
     // Create a colocation service
-    public NetmonService(String slaType, String description, String name, NetmonTypes.SERVICE_TYPES serviceType,
+    public NetmonService(Long colocationId, String slaType, String description, String name, NetmonTypes.SERVICE_TYPES serviceType,
                          int unitNumber, int validIp, int invalidIp, LocalDate startDate, Long duration,
                          Company company, TechnicalPerson technicalPerson, OSType osType) {
+        this.id = colocationId;
         this.slaType = slaType;
         this.description = description;
         this.name = name;
@@ -116,11 +120,12 @@ public class NetmonService extends UserDateAudit {
     }
 
     // Create a VPS service
-    public NetmonService(String description, String name, NetmonTypes.SERVICE_TYPES serviceType,
+    public NetmonService(Long vpsId, String description, String name, NetmonTypes.SERVICE_TYPES serviceType,
                          int validIp, int invalidIp, boolean vnc, VpsPlan vpsPlan, ResourcePrice resourcePrice, double extraRam,
                          double extraCpu, double extraDisk, double extraTraffic,
                          Long duration, Company company, TechnicalPerson technicalPerson,
                          OSType osType, double price) {
+        this.id = vpsId;
         this.description = description;
         this.name = name;
         this.serviceType = serviceType;
@@ -128,6 +133,35 @@ public class NetmonService extends UserDateAudit {
         this.invalidIp = invalidIp;
         this.vnc = vnc;
         this.status = NetmonStatus.ServiceStatus.REQUEST_FOR_NEW_SERVICE;
+        this.vpsPlan = vpsPlan;
+        this.resourcePrice = resourcePrice;
+        this.extraRam = extraRam;
+        this.extraCpu = extraCpu;
+        this.extraDisk = extraDisk;
+        this.extraTraffic = extraTraffic;
+        this.duration = duration;
+        this.company = company;
+        this.technicalPerson = technicalPerson;
+        this.osType = osType;
+        this.price = price;
+        this.finalPrice = price;
+        this.createDate = LocalDate.now();
+    }
+
+    // renew a VPS service
+    public NetmonService(Long vpsId, String description, String name, NetmonTypes.SERVICE_TYPES serviceType,
+                         int validIp, int invalidIp, boolean vnc, VpsPlan vpsPlan, ResourcePrice resourcePrice, double extraRam,
+                         double extraCpu, double extraDisk, double extraTraffic,
+                         Long duration, Company company, TechnicalPerson technicalPerson,
+                         OSType osType, double price,boolean renew) {
+        this.id= vpsId;
+        this.description = description;
+        this.name = name;
+        this.serviceType = serviceType;
+        this.validIp = validIp;
+        this.invalidIp = invalidIp;
+        this.vnc = vnc;
+        this.status = NetmonStatus.ServiceStatus.REQUEST_FOR_RENEW_SERVICE;
         this.vpsPlan = vpsPlan;
         this.resourcePrice = resourcePrice;
         this.extraRam = extraRam;
@@ -205,6 +239,14 @@ public class NetmonService extends UserDateAudit {
 
     public void setCreateDate(LocalDate createDate) {
         this.createDate = createDate;
+    }
+
+    public LocalDate getTerminateDate() {
+        return this.terminateDate;
+    }
+
+    public void setTerminateDate(LocalDate terminateDate) {
+        this.terminateDate = terminateDate;
     }
 
     public String getSlaType() {

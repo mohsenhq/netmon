@@ -9,6 +9,7 @@ import org.redapps.netmon.util.NetmonTypes;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -24,4 +25,9 @@ public interface NetmonServiceRepository extends JpaRepository<NetmonService, Se
 
     boolean existsByIdAndCreateDateAndCompanyIdAndServiceType(Long netmonServiceId, LocalDate creaDate, Long companyId,
                                                  NetmonTypes.SERVICE_TYPES serviceType);
+
+    // @Query("SELECT MAX(services.price) FROM services") Optional<Long> getMax();
+
+    // NetmonService findFirstOrderByNetmonServiceIdDesc();
+    NetmonService findTopByOrderByIdDesc();
 }

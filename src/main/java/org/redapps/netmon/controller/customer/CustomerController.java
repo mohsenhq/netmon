@@ -384,7 +384,12 @@ public class CustomerController {
             throw new BadRequestException("The os type does not exists.");
         }
 
-        NetmonService netmonService = nsService.createColocation(currentUser, colocationRequest,
+        Long vpsId = (long) 1;
+        if (netmonServiceRepository.findTopByOrderByIdDesc() != null) {
+                vpsId = netmonServiceRepository.findTopByOrderByIdDesc().getId() + 1;
+        }
+
+        NetmonService netmonService = nsService.createColocation(currentUser, vpsId, colocationRequest,
                 companyOptional.get(), technicalPersonOptional.get(), osTypeOptional.get());
 
         URI location = ServletUriComponentsBuilder
@@ -452,116 +457,120 @@ public class CustomerController {
         return nsService.getColocationById(colocationId, LocalDate.parse(createDate), currentUser);
     }
 
-//     /**
-//      * create a new device
-//      * @param colocationDeviceRequest the device information object
-//      * @param currentUser the user id who currently logged in
-//      * @param colocationId the unique colocation number
-//      * @return OK response or report error
-//      */
-//     @PostMapping("/colocations/{colocationId}/devices/new")
-//     @PreAuthorize("hasRole('CUSTOMER')")
-//     public ResponseEntity<?> createColocationDevice(@Valid @RequestBody DeviceRequest colocationDeviceRequest,
-//                                                      @CurrentUser UserPrincipal currentUser,
-//                                                      @PathVariable Long colocationId) {
+    /**
+     * create a new device
+     * @param colocationDeviceRequest the device information object
+     * @param currentUser the user id who currently logged in
+     * @param colocationId the unique colocation number
+     * @param createDate the colocation create date
+     * @return OK response or report error
+     */
+    @PostMapping("/colocations/{colocationId}/{createDate}/devices/new")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> createColocationDevice(@Valid @RequestBody DeviceRequest colocationDeviceRequest,
+                                                     @CurrentUser UserPrincipal currentUser,
+                                                     @PathVariable Long colocationId, @PathVariable String createDate) {
 
-//         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-//         if(!companyOptional.isPresent()){
-//             logService.createLog("CREATE_COLOCATION_DEVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-//                     "[colocationId=" + colocationId + "]", colocationDeviceRequest.toString(),
-//                     "The customer has no company.");
-//             throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-//         }
-//         Long companyId = companyOptional.get().getId();
+        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+        if(!companyOptional.isPresent()){
+            logService.createLog("CREATE_COLOCATION_DEVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "[colocationId=" + colocationId + "]", colocationDeviceRequest.toString(),
+                    "The customer has no company.");
+            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+        }
+        Long companyId = companyOptional.get().getId();
 
-//         if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(colocationId, companyId,
-//                 NetmonTypes.SERVICE_TYPES.COLOCATION)) {
-//             logService.createLog("CREATE_COLOCATION_DEVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-//                     "[colocationId=" + colocationId + "]", colocationDeviceRequest.toString(),
-//                     "This service does not belong to the company.");
-//             throw new AccessDeniedException("This service does not belong to the company.");
-//         }
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(colocationId, LocalDate.parse(createDate), companyId,
+                NetmonTypes.SERVICE_TYPES.COLOCATION)) {
+            logService.createLog("CREATE_COLOCATION_DEVICE", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "[colocationId=" + colocationId + "]", colocationDeviceRequest.toString(),
+                    "This service does not belong to the company.");
+            throw new AccessDeniedException("This service does not belong to the company.");
+        }
 
-//         Device colocationDevice = colocationDeviceService.create(colocationDeviceRequest, currentUser, colocationId);
+        Device colocationDevice = colocationDeviceService.create(colocationDeviceRequest, currentUser, colocationId, LocalDate.parse(createDate));
 
-//         URI location = ServletUriComponentsBuilder
-//                 .fromCurrentRequest().path("/{deviceId}")
-//                 .buildAndExpand(colocationDevice.getId()).toUri();
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest().path("/{deviceId}")
+                .buildAndExpand(colocationDevice.getId()).toUri();
 
-//         return ResponseEntity.created(location)
-//                 .body(new ApiResponse(true, "The device created successfully."));
-//     }
+        return ResponseEntity.created(location)
+                .body(new ApiResponse(true, "The device created successfully."));
+    }
 
-//     /**
-//      * getting all devices bu colocation id
-//      * @param currentUser the user id who currently logged in
-//      * @param colocationId the unique colocation number
-//      * @param createDate the service create date
-//      * @param page the page number of the response (default value is 0)
-//      * @param size the page size of each response (default value is 30)
-//      * @return device responses page by page
-//      */
-//     @GetMapping("/colocations/{colocationId}/devices/all")
-//     @PreAuthorize("hasRole('CUSTOMER')")
-//     public PagedResponse<ColocationDeviceResponse> getColocationDevices(@CurrentUser UserPrincipal currentUser,
-//                                                                           @PathVariable Long colocationId,
-//                                                                           @RequestParam(value = "page",
-//                                                                                   defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-//                                                                           @RequestParam(value = "size",
-//                                                                                   defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+    /**
+     * getting all devices by colocation id and date
+     * @param currentUser the user id who currently logged in
+     * @param colocationId the unique colocation number
+     * @param createDate the service create date
+     * @param page the page number of the response (default value is 0)
+     * @param size the page size of each response (default value is 30)
+     * @return device responses page by page
+     */
+    @GetMapping("/colocations/{colocationId}/{createDate}/devices/all")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public PagedResponse<ColocationDeviceResponse> getColocationDevices(@CurrentUser UserPrincipal currentUser,
+                                                                          @PathVariable Long colocationId,
+                                                                          @PathVariable String createDate,
+                                                                          @RequestParam(value = "page",
+                                                                                  defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+                                                                          @RequestParam(value = "size",
+                                                                                  defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
 
-//         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-//         if(!companyOptional.isPresent()){
-//             logService.createLog("GET_ALL_COLOCATION_DEVICES", currentUser.getUsername(),
-//                     NetmonStatus.LOG_STATUS.FAILED,
-//                     "[colocationId=" + colocationId + "]", "", "The customer has no company.");
-//             throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-//         }
-//         Long companyId = companyOptional.get().getId();
+        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+        if(!companyOptional.isPresent()){
+            logService.createLog("GET_ALL_COLOCATION_DEVICES", currentUser.getUsername(),
+                    NetmonStatus.LOG_STATUS.FAILED,
+                    "[colocationId=" + colocationId + "]", "", "The customer has no company.");
+            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+        }
+        Long companyId = companyOptional.get().getId();
 
-//         if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(colocationId, companyId,
-//                 NetmonTypes.SERVICE_TYPES.COLOCATION)) {
-//             logService.createLog("GET_ALL_COLOCATION_DEVICES", currentUser.getUsername(),
-//                     NetmonStatus.LOG_STATUS.FAILED,
-//                     "[colocationId=" + colocationId + "]", "", "This service does not belong to the company.");
-//             throw new AccessDeniedException("This service does not belong to the company.");
-//         }
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(colocationId, LocalDate.parse(createDate), companyId,
+                NetmonTypes.SERVICE_TYPES.COLOCATION)) {
+            logService.createLog("GET_ALL_COLOCATION_DEVICES", currentUser.getUsername(),
+                    NetmonStatus.LOG_STATUS.FAILED,
+                    "[colocationId=" + colocationId + "]", "", "This service does not belong to the company.");
+            throw new AccessDeniedException("This service does not belong to the company.");
+        }
 
-//         return colocationDeviceService.getColocationDevices(currentUser, colocationId, page, size);
-//     }
+        return colocationDeviceService.getColocationDevices(currentUser, colocationId, LocalDate.parse(createDate), page, size);
+    }
 
-//     /**
-//      * getting device info by id
-//      * @param currentUser the user id who currently logged in
-//      * @param colocationId the unique colocation number
-//      * @param deviceId the unique device number
-//      * @return device response
-//      */
-//     @GetMapping("/colocations/{colocationId}/devices/{deviceId}")
-//     @PreAuthorize("hasRole('CUSTOMER')")
-//     public ColocationDeviceResponse getColocationDeviceById(@CurrentUser UserPrincipal currentUser,
-//                                                               @PathVariable Long colocationId,
-//                                                               @PathVariable Long deviceId) {
+    /**
+     * getting device info by id
+     * @param currentUser the user id who currently logged in
+     * @param colocationId the unique colocation number
+     * @param createDate the service create date
+     * @param deviceId the unique device number
+     * @return device response
+     */
+    @GetMapping("/colocations/{colocationId}/{createDate}/devices/{deviceId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ColocationDeviceResponse getColocationDeviceById(@CurrentUser UserPrincipal currentUser,
+                                                              @PathVariable Long colocationId,
+                                                              @PathVariable String createDate,
+                                                              @PathVariable Long deviceId) {
 
-//         Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
-//         if(!companyOptional.isPresent()){
-//             logService.createLog("GET_COLOCATION_DEVICE_INFO", currentUser.getUsername(),
-//                     NetmonStatus.LOG_STATUS.FAILED, "[colocationId=" + colocationId +
-//                             ",deviceId=" + deviceId + "]", "", "The customer has no company.");
-//             throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
-//         }
-//         Long companyId = companyOptional.get().getId();
+        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+        if(!companyOptional.isPresent()){
+            logService.createLog("GET_COLOCATION_DEVICE_INFO", currentUser.getUsername(),
+                    NetmonStatus.LOG_STATUS.FAILED, "[colocationId=" + colocationId +
+                            ",deviceId=" + deviceId + "]", "", "The customer has no company.");
+            throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+        }
+        Long companyId = companyOptional.get().getId();
 
-//         if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(colocationId, companyId,
-//                 NetmonTypes.SERVICE_TYPES.COLOCATION)) {
-//             logService.createLog("GET_COLOCATION_DEVICE_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-//                     "[colocationId=" + colocationId + ",deviceId=" + deviceId + "]", "",
-//                     "This service does not belong to the company.");
-//             throw new AccessDeniedException("This service does not belong to the company.");
-//         }
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(colocationId, LocalDate.parse(createDate), companyId,
+                NetmonTypes.SERVICE_TYPES.COLOCATION)) {
+            logService.createLog("GET_COLOCATION_DEVICE_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "[colocationId=" + colocationId + ",deviceId=" + deviceId + "]", "",
+                    "This service does not belong to the company.");
+            throw new AccessDeniedException("This service does not belong to the company.");
+        }
 
-//         return colocationDeviceService.getColocationDeviceById(deviceId, currentUser);
-//     }
+        return colocationDeviceService.getColocationDeviceById(deviceId, currentUser);
+    }
 
     /**
      * getting list of ips by service id
@@ -1451,8 +1460,94 @@ public class CustomerController {
             }
         ResourcePrice resourcePrice = resourcePriceRepository.findTopByOrderByDateDesc();
         
+        Long vpsId = (long) 1;
+        if (netmonServiceRepository.findTopByOrderByIdDesc() != null) {
+                vpsId = netmonServiceRepository.findTopByOrderByIdDesc().getId() + 1;
+        }
+        
+        NetmonService netmonService = nsService.createVPS(currentUser, vpsId, vpsRequest, companyOptional.get(),
+                technicalPersonOptional.get(), osType, vpsPlan, resourcePrice);
 
-        NetmonService netmonService = nsService.createVPS(currentUser, vpsRequest, companyOptional.get(),
+        int[] ports = vpsRequest.getPorts();
+        for (int port : ports) {
+            if (!servicePortRepository.existsByPortAndNetmonService(port, netmonService)) {
+                ServicePortRequest servicePortRequest = new ServicePortRequest(port, "");
+                portService.create(servicePortRequest, currentUser, netmonService.getId(), netmonService.getCreateDate());
+            }
+        }
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest().path("/{vpsId}")
+                .buildAndExpand(netmonService.getId()).toUri();
+
+        return ResponseEntity.created(location)
+                .body(new ApiResponse(true, "The VPS created successfully."));
+    }
+
+    /**
+     * renew a vps
+     * @param vpsId the vps Id
+     * @param createDate the vps createDate
+     * @param vpsRequest the vps information object
+     * @param currentUser the user id who currently logged in
+     * @return OK response or report error
+     */
+    @PostMapping("/vps/{vpsId}/{createDate}/renew")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> reNewVPS(@Valid @RequestBody VpsRequest vpsRequest,
+                                       @CurrentUser UserPrincipal currentUser, @PathVariable Long vpsId, @PathVariable String createDate) {
+
+        Optional<Company> companyOptional = companyRepository.findByUserId(currentUser.getId());
+        if(!companyOptional.isPresent()){
+                logService.createLog("CREATE_VPS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                        "", vpsRequest.toString(), "The customer has no company.");
+                throw new ResourceNotFoundException("Company", "userId", currentUser.getId());
+        }
+
+        Optional<TechnicalPerson> technicalPersonOptional = technicalPersonRepository.findByIdAndUserId(
+                vpsRequest.getTechnicalPersonId(), currentUser.getId());
+        if (!technicalPersonOptional.isPresent()) {
+            logService.createLog("CREATE_VPS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "", vpsRequest.toString(), "This technical person does not exists.");
+            throw new BadRequestException("This technical person does not exists.");
+        }
+
+        Optional<OSType> osTypeOptional = osTypeRepository.findById(vpsRequest.getOsTypeId());
+        if (!osTypeOptional.isPresent()) {
+            logService.createLog("CREATE_VPS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "", vpsRequest.toString(), "This os type does not exists.");
+            throw new BadRequestException("This os type does not exists.");
+        }
+        OSType osType = osTypeOptional.get();
+        if(!osType.isActive()){
+            logService.createLog("CREATE_VPS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "", vpsRequest.toString(), "The os type is not active.");
+            throw new AccessDeniedException("The os type is not active.");
+        }
+
+        Optional<VpsPlan> vpsPlanOptional = vpsPlanRepository.findById(vpsRequest.getVpsPlan());
+        if (!vpsPlanOptional.isPresent()) {
+            logService.createLog("CREATE_VPS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "", vpsRequest.toString(), "This vps plan does not exists.");
+            throw new BadRequestException("This vps plan does not exists.");
+        }
+
+        VpsPlan vpsPlan = vpsPlanOptional.get();
+        if(!vpsPlan.isActive()){
+            logService.createLog("CREATE_VPS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "", vpsRequest.toString(), "The vps plan is not active.");
+            throw new AccessDeniedException("The vps plan is not active.");
+        }
+
+        if (!resourcePriceRepository.existsTopByOrderByDateDesc()) {
+                logService.createLog("CREATE_VPS", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                        "", vpsRequest.toString(), "This resourcePrice does not exists.");
+                throw new BadRequestException("This resourcePrice does not exists.");
+            }
+        ResourcePrice resourcePrice = resourcePriceRepository.findTopByOrderByDateDesc();
+        
+        String netmonServiceName = netmonServiceRepository.getOne(new ServiceIdentity(vpsId, LocalDate.parse(createDate))).getName();
+        NetmonService netmonService = nsService.reNewVPS(currentUser,netmonServiceName, vpsId, vpsRequest, companyOptional.get(),
                 technicalPersonOptional.get(), osType, vpsPlan, resourcePrice);
 
         int[] ports = vpsRequest.getPorts();

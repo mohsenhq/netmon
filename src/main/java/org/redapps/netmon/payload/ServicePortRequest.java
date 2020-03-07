@@ -3,9 +3,6 @@ package org.redapps.netmon.payload;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
 public class ServicePortRequest {
 
     private int port;

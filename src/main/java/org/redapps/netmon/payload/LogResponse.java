@@ -2,9 +2,7 @@ package org.redapps.netmon.payload;
 
 import org.redapps.netmon.util.NetmonStatus;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 public class LogResponse {
 
