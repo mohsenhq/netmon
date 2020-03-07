@@ -146,3 +146,4 @@ target/classes/org/redapps/netmon/util/UploadFiles.class
 .settings/org.eclipse.m2e.core.prefs
 .project
 .vscode/launch.json
+.vscode/settings.json
