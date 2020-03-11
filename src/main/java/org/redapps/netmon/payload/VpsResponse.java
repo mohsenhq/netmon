@@ -274,4 +274,13 @@ public class VpsResponse {
     public void setExtraPrice(double extraPrice) {
         this.extraPrice = extraPrice;
     }
+
+    public double getFinalPrice() {
+        return this.finalPrice;
+    }
+
+    public void setFinalPrice(double finalPrice) {
+        this.finalPrice = finalPrice;
+    }
+
 }

@@ -1,8 +1,6 @@
 package org.redapps.netmon.repository;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 import org.redapps.netmon.model.PlanPrice;
 import org.redapps.netmon.model.PlanPriceId;

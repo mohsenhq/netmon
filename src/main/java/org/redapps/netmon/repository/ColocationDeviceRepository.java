@@ -1,7 +1,6 @@
 package org.redapps.netmon.repository;
 
 import org.redapps.netmon.model.Device;
-import org.redapps.netmon.model.ServiceIdentity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

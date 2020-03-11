@@ -77,45 +77,48 @@ public class NSService {
                 netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(), netmonServicesPage.isLast());
     }
 
-//     /**
-//      * @param currentUser the user id who currently logged in
-//      * @param page the page number of the response (default value is 0)
-//      * @param size the page size of each response (default value is 30)
-//      * @return colocation responses page by page
-//      */
-//     public PagedResponse<ColocationResponse> getAllColocations(UserPrincipal currentUser,
-//                                                                  int page, int size) {
-//         validatePageNumberAndSize(page, size);
+    /**
+     * @param currentUser the user id who currently logged in
+     * @param page the page number of the response (default value is 0)
+     * @param size the page size of each response (default value is 30)
+     * @return colocation responses page by page
+     */
+    public PagedResponse<ColocationResponse> getAllColocations(UserPrincipal currentUser, int page, int size) {
+            validatePageNumberAndSize(page, size);
 
-//         // find all colocations (type = 0)
-//         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-//         Page<NetmonService> netmonServicesPage = netmonServiceRepository.findAllByServiceType(0, pageable);
+            // find all colocations (type = 0)
+            Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+            Page<NetmonService> netmonServicesPage = netmonServiceRepository
+                            .findAllByServiceType(SERVICE_TYPES.COLOCATION, pageable);
 
-//         if (netmonServicesPage.getNumberOfElements() == 0) {
-//             return new PagedResponse<>(Collections.emptyList(), netmonServicesPage.getNumber(),
-//                     netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(), netmonServicesPage.isLast());
-//         }
+            if (netmonServicesPage.getNumberOfElements() == 0) {
+                    return new PagedResponse<>(Collections.emptyList(), netmonServicesPage.getNumber(),
+                                    netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(),
+                                    netmonServicesPage.getTotalPages(), netmonServicesPage.isLast());
+            }
 
-//         // store colocations into a list
-//         Vector<ColocationResponse> colocationResponses = new Vector<>(10);
-//         ColocationResponse colocationResponse;
-//         for (NetmonService netmonService : netmonServicesPage) {
-//             colocationResponse = new ColocationResponse(netmonService.getId(), netmonService.getName(),
-//                     netmonService.getUnitNumber(), netmonService.getSlaType(),
-//                     netmonService.getDescription(), netmonService.getValidIp(), netmonService.getInvalidIp(),
-//                     netmonService.getStatus(), netmonService.getUsageType(),  netmonService.getRackPosition(),
-//                     netmonService.getOsType().getId(), netmonService.getStartDate(),
-//                     netmonService.getDuration(), netmonService.getDiscountPercent());
+            // store colocations into a list
+            Vector<ColocationResponse> colocationResponses = new Vector<>(10);
+            ColocationResponse colocationResponse;
+            for (NetmonService netmonService : netmonServicesPage) {
+                    colocationResponse = new ColocationResponse(netmonService.getId(), netmonService.getCreateDate(),
+                                    netmonService.getName(), netmonService.getUnitNumber(), netmonService.getSlaType(),
+                                    netmonService.getDescription(), netmonService.getValidIp(),
+                                    netmonService.getInvalidIp(), netmonService.getStatus(),
+                                    netmonService.getUsageType(), netmonService.getRackPosition(),
+                                    netmonService.getOsType().getId(), netmonService.getStartDate(),
+                                    netmonService.getDuration(), netmonService.getDiscountPercent());
 
-//             colocationResponses.add(colocationResponse);
+                    colocationResponses.add(colocationResponse);
 
-//         }
+            }
 
-//         logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS, "", "", "");
-//         return new PagedResponse<>(colocationResponses, netmonServicesPage.getNumber(),
-//                 netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(), netmonServicesPage.getTotalPages(),
-//                 netmonServicesPage.isLast());
-//     }
+            logService.createLog("GET_COLOCATION_INFO", currentUser.getUsername(), NetmonStatus.LOG_STATUS.SUCCESS, "",
+                            "", "");
+            return new PagedResponse<>(colocationResponses, netmonServicesPage.getNumber(),
+                            netmonServicesPage.getSize(), netmonServicesPage.getTotalElements(),
+                            netmonServicesPage.getTotalPages(), netmonServicesPage.isLast());
+    }
 
     /**
      * @param currentUser the user id who currently logged in

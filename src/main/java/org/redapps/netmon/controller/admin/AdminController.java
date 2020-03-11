@@ -195,33 +195,33 @@ public class AdminController {
         return ResponseEntity.created(location).body(new ApiResponse(true, "Password has been reset successfully"));
     }
 
-    // /**
-    //  *
-    //  * @param currentUser the user id who currently logged in
-    //  * @param username the username of one user
-    //  * @return user profile
-    //  */
-    // @GetMapping("/users/{username}")
-    // @PreAuthorize("hasRole('ADMIN')")
-    // public UserProfile getUserProfile(@CurrentUser UserPrincipal currentUser,
-    //                                   @PathVariable(value = "username") String username) {
+    /**
+     *
+     * @param currentUser the user id who currently logged in
+     * @param username the username of one user
+     * @return user profile
+     */
+    @GetMapping("/users/{username}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserProfile getUserProfile(@CurrentUser UserPrincipal currentUser,
+                                      @PathVariable(value = "username") String username) {
 
-    //     Optional<User> userOptional = userRepository.findByUsername(username);
-    //     if(!userOptional.isPresent()){
-    //         logger.error("User not found [username: " + username + "].");
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if(!userOptional.isPresent()){
+            logger.error("User not found [username: " + username + "].");
 
-    //         logService.createLog("GET_USER_PROFILE", username, NetmonStatus.LOG_STATUS.FAILED, "[username=" + username + "]", "",
-    //                 "This user not found.");
-    //         throw new ResourceNotFoundException("User", "username", username);
-    //     }
+            logService.createLog("GET_USER_PROFILE", username, NetmonStatus.LOG_STATUS.FAILED, "[username=" + username + "]", "",
+                    "This user not found.");
+            throw new ResourceNotFoundException("User", "username", username);
+        }
 
-    //     User user = userOptional.get();
+        User user = userOptional.get();
 
-    //     logService.createLog("GET_USER_PROFILE", username, NetmonStatus.LOG_STATUS.SUCCESS,
-    //             "[username=" + username + "]", "", "");
+        logService.createLog("GET_USER_PROFILE", username, NetmonStatus.LOG_STATUS.SUCCESS,
+                "[username=" + username + "]", "", "");
 
-    //     return new UserProfile(user.getId(), user.getUsername(), user.getName(), user.getCreatedAt());
-    // }
+        return new UserProfile(user.getId(), user.getUsername(), user.getName(), user.getEmail(), user.getCreatedAt());
+    }
 
     /**
      * getting list of all logs

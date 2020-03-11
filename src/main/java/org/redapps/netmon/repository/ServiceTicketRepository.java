@@ -1,6 +1,5 @@
 package org.redapps.netmon.repository;
 
-import org.redapps.netmon.model.ServiceIdentity;
 import org.redapps.netmon.model.Ticket;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

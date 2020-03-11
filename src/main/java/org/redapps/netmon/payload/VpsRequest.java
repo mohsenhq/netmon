@@ -4,7 +4,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 
 public class VpsRequest {
 

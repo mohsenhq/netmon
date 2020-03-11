@@ -42,7 +42,7 @@ public class ManagerController {
     private final PlanPriceRepository planPriceRepository;
     private final PlanPriceService planPriceService;
     private final ResourcePriceService resourcePriceService;
-//     private final BillingService billingService;
+    private final BillingService billingService;
 
     @Autowired
         public ManagerController(LogService logService, NetmonServiceRepository netmonServiceRepository,
@@ -50,7 +50,7 @@ public class ManagerController {
                         CompanyRepository companyRepository, NSService nsService,
                         ResourcePriceRepository resourcePriceRepository, ResourcePriceService resourcePriceService,
                         PlanPriceRepository planPriceRepository, PlanPriceService planPriceService
-                        // , BillingService billingService
+                        , BillingService billingService
         ) {
         this.logService = logService;
         this.netmonServiceRepository = netmonServiceRepository;
@@ -63,7 +63,7 @@ public class ManagerController {
         this.resourcePriceService = resourcePriceService;
         this.planPriceRepository = planPriceRepository;
         this.planPriceService = planPriceService;
-        // this.billingService = billingService;
+        this.billingService = billingService;
     }
 
     /**
@@ -260,63 +260,63 @@ public class ManagerController {
                 .body(new ApiResponse(true, "The service updated successfully."));
     }
 
-//     /**
-//      * changing the billing status to VOID
-//      * @param serviceBillingRequest the billing information object
-//      * @param currentUser the user id who currently logged in
-//      * @param customerId the customer unique number who requested the service
-//      * @param serviceType vps / collocation
-//      * @param serviceId the unique service number
-//      * @param createDate the service create date
-//      * @param billingId the unique billing number
-//      * @return OK response or report error
-//      */
-//     @PutMapping("/customers/{customerId}/{serviceType}/{serviceId}/billings/{billingId}/void")
-//     @PreAuthorize("hasRole('MANAGER')")
-//     public ResponseEntity<?> voidServiceBillingById(@Valid @RequestBody ServiceBillingRequest serviceBillingRequest,
-//                                                       @CurrentUser UserPrincipal currentUser,
-//                                                       @PathVariable Long customerId,
-//                                                       @PathVariable String serviceType,
-//                                                       @PathVariable Long serviceId,
-//                                                 //       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createDate,
-//                                                       @PathVariable Long billingId) {
+    /**
+     * changing the billing status to VOID
+     * @param serviceBillingRequest the billing information object
+     * @param currentUser the user id who currently logged in
+     * @param customerId the customer unique number who requested the service
+     * @param serviceType vps / collocation
+     * @param serviceId the unique service number
+     * @param createDate the service create date
+     * @param billingId the unique billing number
+     * @return OK response or report error
+     */
+    @PutMapping("/customers/{customerId}/{serviceType}/{serviceId}/{createDate}/billings/{billingId}/void")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> voidServiceBillingById(@Valid @RequestBody ServiceBillingRequest serviceBillingRequest,
+                                                      @CurrentUser UserPrincipal currentUser,
+                                                      @PathVariable Long customerId,
+                                                      @PathVariable String serviceType,
+                                                      @PathVariable Long serviceId,
+                                                      @PathVariable String createDate,
+                                                      @PathVariable Long billingId) {
 
-//         if (!userRepository.existsById(customerId)) {
-//             logService.createLog("VOID_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-//                     "[customerId=" + customerId + ",serviceId=" + serviceId + ",billingId=" + billingId + "]",
-//                     serviceBillingRequest.toString(), "The customer does not exists.");
-//             throw new ResourceNotFoundException("Customer", "customerId", customerId);
-//         }
+        if (!userRepository.existsById(customerId)) {
+            logService.createLog("VOID_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate + ",billingId=" + billingId + "]",
+                    serviceBillingRequest.toString(), "The customer does not exists.");
+            throw new ResourceNotFoundException("Customer", "customerId", customerId);
+        }
 
-//         Optional<Company> companyOptional = companyRepository.findByUserId(customerId);
-//         if(!companyOptional.isPresent()){
-//             logService.createLog("VOID_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-//                     "[customerId=" + customerId + ",serviceId=" + serviceId + ",billingId=" + billingId + "]",
-//                     serviceBillingRequest.toString(), "The customer has no company.");
-//             throw new ResourceNotFoundException("Company", "userId", customerId);
-//         }
-//         Long companyId = companyOptional.get().getId();
+        Optional<Company> companyOptional = companyRepository.findByUserId(customerId);
+        if(!companyOptional.isPresent()){
+            logService.createLog("VOID_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate+ ",billingId=" + billingId + "]",
+                    serviceBillingRequest.toString(), "The customer has no company.");
+            throw new ResourceNotFoundException("Company", "userId", customerId);
+        }
+        Long companyId = companyOptional.get().getId();
 
-//         NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
-//         if(serviceType.compareToIgnoreCase("vps") == 0)
-//             srvType = NetmonTypes.SERVICE_TYPES.VPS;
+        NetmonTypes.SERVICE_TYPES srvType = NetmonTypes.SERVICE_TYPES.COLOCATION;
+        if(serviceType.compareToIgnoreCase("vps") == 0)
+            srvType = NetmonTypes.SERVICE_TYPES.VPS;
 
-//         if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId, companyId, srvType)) {
-//             logService.createLog("VOID_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
-//                     "[customerId=" + customerId + ",serviceId=" + serviceId + ",billingId=" + billingId + "]",
-//                     serviceBillingRequest.toString(), "This service does not belong to the company.");
-//             throw new AccessDeniedException("This service does not belong to the company.");
-//         }
+        if (!netmonServiceRepository.existsByIdAndCreateDateAndCompanyIdAndServiceType(serviceId, LocalDate.parse(createDate), companyId, srvType)) {
+            logService.createLog("VOID_BILLING", currentUser.getUsername(), NetmonStatus.LOG_STATUS.FAILED,
+                    "[customerId=" + customerId + ",serviceId=" + serviceId + ",createDate=" + createDate+ ",billingId=" + billingId + "]",
+                    serviceBillingRequest.toString(), "This service does not belong to the company.");
+            throw new AccessDeniedException("This service does not belong to the company.");
+        }
 
-//         billingService.voidBilling(currentUser, billingId, serviceBillingRequest);
+        billingService.voidBilling(currentUser, billingId, serviceBillingRequest);
 
-//         URI location = ServletUriComponentsBuilder
-//                 .fromCurrentRequest().path("/{billingId}")
-//                 .buildAndExpand(billingId).toUri();
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest().path("/{billingId}")
+                .buildAndExpand(billingId).toUri();
 
-//         return ResponseEntity.created(location)
-//                 .body(new ApiResponse(true, "The billing updated successfully."));
-//     }
+        return ResponseEntity.created(location)
+                .body(new ApiResponse(true, "The billing updated successfully."));
+    }
 
     /**
      * geting a resourcePrice info by id

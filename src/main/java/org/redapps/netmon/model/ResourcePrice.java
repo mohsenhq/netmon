@@ -1,6 +1,5 @@
 package org.redapps.netmon.model;
 
-import org.hibernate.annotations.Type;
 import org.redapps.netmon.model.audit.UserDateAudit;
 
 import java.time.LocalDate;
