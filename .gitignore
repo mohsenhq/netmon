@@ -147,3 +147,4 @@ target/classes/org/redapps/netmon/util/UploadFiles.class
 .project
 .vscode/launch.json
 .vscode/settings.json
+.idea
