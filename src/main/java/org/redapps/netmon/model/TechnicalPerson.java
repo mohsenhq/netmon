@@ -33,11 +33,10 @@ public class TechnicalPerson extends DateAudit {
     @Size(max = 20)
     private String mobile;
 
-    @NotNull
-    @NaturalId
+    @NotBlank
     private long nationalId;
 
-    @NaturalId
+    @NotBlank
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
